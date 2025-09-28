@@ -95,10 +95,8 @@ export function StartWebsite ()
         }
         if (qaNew) {
             qaNew.addEventListener('click', () => {
-                // Start empty primitive scene in main viewer instead of navigating away
-                if (website && website.StartEmptyScene) {
-                    website.StartEmptyScene();
-                }
+                // Navigate to create.html with 'new' parameter to show primitives bar
+                window.location.href = './create.html?mode=new';
             });
         }
         if (qaSaveAs) {

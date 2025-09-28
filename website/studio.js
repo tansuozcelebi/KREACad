@@ -64,19 +64,32 @@ class PrimitiveStudio {
     this.initLights();
     this.initGround();
     this.initUI();
+
+    // Check URL parameters to determine if primitives bar should be shown
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+
     // After ground creation, fit camera if we have any mesh
     this.fitScene();
-        // If primitive bar failed to populate (edge case bundling order) add fallback
-        if (!document.getElementById('primitive_bar').children.length) {
-            this.fallbackPopulateBar();
+        // No longer auto-populate primitive_bar; handled by static HTML in toolbar
+
+        // Only add default cube and show primitives if in 'new' mode
+        if (mode === 'new') {
+            // Show the primitives bar
+            const primitivesBar = document.getElementById('studio_primitives_bar');
+            if (primitivesBar) {
+                primitivesBar.style.display = 'flex';
+            }
+
+            // Add a default cube so the scene isn't empty/dark
+            if (this.model.MeshCount() === 0) {
+                this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
+                this.primitivesManager.CreatePrimitive('cube');
+                this.viewer.SetModel(this.model);
+                this.focusOnModel();
+            }
         }
-        // Add a default cube so the scene isn't empty/dark
-        if (this.model.MeshCount() === 0) {
-            this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
-            this.primitivesManager.CreatePrimitive('cube');
-            this.viewer.SetModel(this.model);
-            this.focusOnModel();
-        }
+
         this.initDebugOverlay();
         this.bindResize();
     }
