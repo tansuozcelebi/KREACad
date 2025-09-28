@@ -135,6 +135,7 @@ class ExportDialog
             new ModelExporterUI ('glTF Text (.gltf)', FileFormat.Text, 'gltf'),
             new ModelExporterUI ('glTF Binary (.glb)', FileFormat.Binary, 'glb'),
             new ModelExporterUI ('Object File Format Text (.off)', FileFormat.Text, 'off'),
+            new ModelExporterUI ('STEP (.step)', FileFormat.Text, 'step'),
             new ModelExporterUI ('Rhinoceros 3D (.3dm)', FileFormat.Binary, '3dm'),
             new ModelExporterUI ('Dotbim (.bim)', FileFormat.Text, 'bim')
         ];

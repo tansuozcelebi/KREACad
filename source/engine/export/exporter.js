@@ -6,6 +6,7 @@ import { ExporterObj } from './exporterobj.js';
 import { ExporterOff } from './exporteroff.js';
 import { ExporterPly } from './exporterply.js';
 import { ExporterStl } from './exporterstl.js';
+import { ExporterStep } from './exporterstep.js';
 
 export class Exporter
 {
@@ -18,7 +19,8 @@ export class Exporter
             new ExporterOff (),
             new ExporterGltf (),
             new Exporter3dm (),
-            new ExporterBim ()
+            new ExporterBim (),
+            new ExporterStep ()
         ];
     }
 

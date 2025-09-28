@@ -67,15 +67,34 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
         <button id="clear_btn" title="Clear Scene">Clear</button>
         <!-- Primitives Bar (inline, same height as toolbar buttons) -->
         <div id="studio_primitives_bar" style="display:none; align-items:center; gap:6px; margin-left:18px;">
-            <button class="prim_icon_btn" data-prim="cube" title="Cube">CUB</button>
-            <button class="prim_icon_btn" data-prim="sphere" title="Sphere">SPH</button>
-            <button class="prim_icon_btn" data-prim="cylinder" title="Cylinder">CYL</button>
-            <button class="prim_icon_btn" data-prim="cone" title="Cone">CON</button>
-            <button class="prim_icon_btn" data-prim="torus" title="Torus">TOR</button>
-            <button class="prim_icon_btn" data-prim="plane" title="Plane">PLN</button>
-            <button class="prim_icon_btn" data-prim="icosahedron" title="Icosahedron">ICO</button>
-            <button class="prim_icon_btn" data-prim="octahedron" title="Octahedron">OCT</button>
-            <button id="add_trefoil_btn" style="margin-left:10px; background:#2a5770; border:1px solid #34769a; color:#fff; font-weight:600; font-size:11px; border-radius:8px; cursor:pointer; height:34px; padding:0 14px;">Add Trefoil</button>
+            <button class="prim_icon_btn" data-prim="cube" title="Cube">
+                <img src="assets/icons/cube.svg" alt="Cube" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="sphere" title="Sphere">
+                <img src="assets/icons/sphere.svg" alt="Sphere" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="cylinder" title="Cylinder">
+                <img src="assets/icons/cylinder.svg" alt="Cylinder" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="cone" title="Cone">
+                <img src="assets/icons/cone.svg" alt="Cone" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="torus" title="Torus">
+                <img src="assets/icons/torus.svg" alt="Torus" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="plane" title="Plane">
+                <img src="assets/icons/plane.svg" alt="Plane" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="icosahedron" title="Icosahedron">
+                <img src="assets/icons/icosahedron.svg" alt="Icosahedron" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="octahedron" title="Octahedron">
+                <img src="assets/icons/octahedron.svg" alt="Octahedron" width="16" height="16">
+            </button>
+            <button id="add_trefoil_btn" style="margin-left:10px; background:#2a5770; border:1px solid #34769a; color:#fff; font-weight:600; font-size:11px; border-radius:8px; cursor:pointer; height:34px; padding:0 14px;">
+                <img src="assets/icons/trefoil.svg" alt="Trefoil" width="16" height="16" style="margin-right:6px;">
+                Add Trefoil
+            </button>
         </div>
     </div>
     <div id="param_panel">
@@ -108,6 +127,38 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
     </div>
     <div class="footer_hint">WASD Move • QE Up/Down • RF Scale • TG Rotate • C Color • ESC Deselect</div>
 </div>
+
+       <!-- KreaCAD Primitives Bar -->
+        <div class="primitives_bar" id="primitives_bar" style="display: none;">
+            <div class="primitives_title">Primitives</div>
+            <div class="primitives_icons">
+                <div class="primitive_icon" data-primitive="cube" title="Cube">
+                    <div class="icon_shape cube_icon">⬛</div>
+                </div>
+                <div class="primitive_icon" data-primitive="sphere" title="Sphere">
+                    <div class="icon_shape sphere_icon">⚫</div>
+                </div>
+                <div class="primitive_icon" data-primitive="cylinder" title="Cylinder">
+                    <div class="icon_shape cylinder_icon">🟫</div>
+                </div>
+                <div class="primitive_icon" data-primitive="cone" title="Cone">
+                    <div class="icon_shape cone_icon">🔺</div>
+                </div>
+                <div class="primitive_icon" data-primitive="torus" title="Torus">
+                    <div class="icon_shape torus_icon">⭕</div>
+                </div>
+                <div class="primitive_icon" data-primitive="plane" title="Plane">
+                    <div class="icon_shape plane_icon">⬜</div>
+                </div>
+                <div class="primitive_icon" data-primitive="icosahedron" title="Icosahedron">
+                    <div class="icon_shape icosahedron_icon">💎</div>
+                </div>
+                <div class="primitive_icon" data-primitive="octahedron" title="Octahedron">
+                    <div class="icon_shape octahedron_icon">♦</div>
+                </div>
+            </div>
+        </div>
+
 <script src="../build/website_dev/o3dv.website.min.js"></script>
 <script type="module" src="./studio.js"></script>
 </body>

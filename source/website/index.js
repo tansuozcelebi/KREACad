@@ -1,5 +1,4 @@
 import { Loc } from '../engine/core/localization.js';
-import { AddDiv, AddDomElement } from '../engine/viewer/domutils.js';
 import { Embed } from './embed.js';
 import { Website } from './website.js';
 import { SetEventHandler, HandleEvent } from './eventhandler.js';
@@ -50,14 +49,7 @@ export function RegisterToolbarPlugin (plugin)
 export function StartWebsite ()
 {
     window.addEventListener ('load', () => {
-        if (window.self !== window.top) {
-            let noEmbeddingDiv = AddDiv (document.body, 'noembed');
-            AddDiv (noEmbeddingDiv, null, Loc ('Embedding KreaCAD in an iframe is not supported.'));
-            let link = AddDomElement (noEmbeddingDiv, 'a', null, Loc ('Open KreaCAD'));
-            link.target = '_blank';
-            link.href = window.self.location;
-            return;
-        }
+        // Removed iframe restriction - embedding is now supported
 
         document.getElementById ('intro_dragdrop_text').innerHTML = Loc ('Drag and drop 3D models here.');
         document.getElementById ('intro_formats_title').innerHTML = Loc ('Open some samples:');
