@@ -39,35 +39,56 @@ function copyRecursive(src, dest) {
 function rewriteHtml(filePath) {
   if (!fs.existsSync(filePath)) return;
   let html = fs.readFileSync(filePath, 'utf8');
-  // Replace dev build references ../build/website_dev -> ./build/website
-  html = html.replace(/\.\.\/build\/website_dev\/o3dv\.website\.min/g, './build/website/o3dv.website.min');
-  html = html.replace(/\.\.\/build\/website_dev/g, './build/website');
+  // Replace dev build references for single-folder deployment
+  html = html.replace(/\.\.\/build\/website_dev\/o3dv\.website\.min/g, './o3dv.website.min');
+  html = html.replace(/\.\.\/build\/website_dev/g, './');
+  html = html.replace(/\.\/build\/website\/o3dv\.website\.min/g, './o3dv.website.min');
+  html = html.replace(/\.\/build\/engine\/o3dv\.min/g, './o3dv.min');
+  html = html.replace(/\.\.\/assets\//g, './assets/');
   fs.writeFileSync(filePath, html, 'utf8');
 }
 
 function main() {
-  console.log('Creating production dist folder...');
+  console.log('Creating single-folder production build...');
   emptyDir(distDir);
   fs.mkdirSync(distDir, { recursive: true });
 
-  // Copy website root HTML and assets
+  // Copy website root HTML files
   const websiteSrc = path.join(root, 'website');
-  const websiteDest = path.join(distDir);
-  copyRecursive(websiteSrc, websiteDest);
+  copyRecursive(websiteSrc, distDir);
 
-  // Copy build outputs (engine + website)
-  copyRecursive(path.join(root, 'build', 'website'), path.join(distDir, 'build', 'website'));
-  copyRecursive(path.join(root, 'build', 'engine_prod'), path.join(distDir, 'build', 'engine'));
-  // Fallback to engine if prod not built
-  if (!fs.existsSync(path.join(distDir, 'build', 'engine', 'o3dv.min.js'))) {
-    copyRecursive(path.join(root, 'build', 'engine'), path.join(distDir, 'build', 'engine'));
+  // Copy assets to root
+  copyRecursive(path.join(root, 'assets'), path.join(distDir, 'assets'));
+
+  // Copy built JS/CSS files directly to root
+  const websiteBuild = path.join(root, 'build', 'website');
+  if (fs.existsSync(websiteBuild)) {
+    for (const file of fs.readdirSync(websiteBuild)) {
+      if (file.endsWith('.js') || file.endsWith('.css') || file.endsWith('.map') ||
+          file.endsWith('.ttf') || file.endsWith('.woff') || file.endsWith('.svg')) {
+        fs.copyFileSync(path.join(websiteBuild, file), path.join(distDir, file));
+      }
+    }
   }
 
-  // Rewrite HTML files for prod bundle path
+  // Copy engine build directly to root
+  const engineBuildProd = path.join(root, 'build', 'engine_prod');
+  const engineBuildDev = path.join(root, 'build', 'engine');
+  const engineSrc = fs.existsSync(engineBuildProd) ? engineBuildProd : engineBuildDev;
+
+  if (fs.existsSync(engineSrc)) {
+    for (const file of fs.readdirSync(engineSrc)) {
+      if (file.endsWith('.js') || file.endsWith('.map')) {
+        fs.copyFileSync(path.join(engineSrc, file), path.join(distDir, file));
+      }
+    }
+  }
+
+  // Rewrite HTML files for single-folder paths
   rewriteHtml(path.join(distDir, 'index.html'));
   rewriteHtml(path.join(distDir, 'create.html'));
 
-  console.log('dist folder created at:', distDir);
+  console.log('Single-folder dist created at:', distDir);
 }
 
 main();

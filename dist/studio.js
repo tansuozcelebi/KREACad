@@ -64,18 +64,33 @@ class PrimitiveStudio {
     this.initLights();
     this.initGround();
     this.initUI();
+
+    // Check URL parameters to determine if primitives bar should be shown
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+
     // After ground creation, fit camera if we have any mesh
     this.fitScene();
-        // If primitive bar failed to populate (edge case bundling order) add fallback
-        if (!document.getElementById('primitive_bar').children.length) {
-            this.fallbackPopulateBar();
+        // No longer auto-populate primitive_bar; handled by static HTML in toolbar
+
+        // Only add default cube and show primitives if in 'new' mode
+        if (mode === 'new') {
+            // Show the primitives bar
+            const primitivesBar = document.getElementById('studio_primitives_bar');
+            if (primitivesBar) {
+                primitivesBar.style.display = 'flex';
+            }
+
+            // Add a default cube so the scene isn't empty/dark
+            if (this.model.MeshCount() === 0) {
+                this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
+                this.primitivesManager.CreatePrimitive('cube');
+                this.viewer.SetModel(this.model);
+                this.focusOnModel();
+            }
         }
-        // Add a default cube so the scene isn't empty/dark
-        if (this.model.MeshCount() === 0) {
-            this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
-            this.primitivesManager.CreatePrimitive('cube');
-            this.viewer.SetModel(this.model);
-        }
+
+        this.initDebugOverlay();
         this.bindResize();
     }
 
@@ -108,28 +123,7 @@ class PrimitiveStudio {
     }
 
     initUI () {
-        const types = ['cube', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'icosahedron', 'octahedron'];
-        const bar = document.getElementById('primitive_bar');
-        types.forEach(type => {
-            const btn = document.createElement('button');
-            btn.textContent = type.substring(0, 3).toUpperCase();
-            btn.className = 'prim_btn';
-            btn.addEventListener('click', () => {
-                this.createPrimitive(type, btn);
-            });
-            bar.appendChild(btn);
-        });
-
-        // Trefoil button (logical add)
-        const trefoilBtn = document.createElement('button');
-        trefoilBtn.textContent = 'TRF';
-        trefoilBtn.className = 'prim_btn';
-        trefoilBtn.addEventListener('click', () => {
-            this.generateTrefoilFromUI();
-            document.querySelectorAll('.prim_btn').forEach(b => b.classList.remove('active'));
-            trefoilBtn.classList.add('active');
-        });
-        bar.appendChild(trefoilBtn);
+        // No longer populate primitive_bar in param_panel; handled by static HTML in toolbar
 
         document.getElementById('metalness_slider').addEventListener('input', (e) => {
             document.getElementById('metalness_val').textContent = parseFloat(e.target.value).toFixed(2);
@@ -169,14 +163,31 @@ class PrimitiveStudio {
             // Fallback if no history (opened directly) -> go to index
             window.location.href = './index.html';
         });
+
+        // Inline primitives bar wiring (toolbar)
+        const toolbarButtons = document.querySelectorAll('#studio_primitives_bar .prim_icon_btn');
+        toolbarButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-prim');
+                this.createPrimitive(type, btn);
+                toolbarButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        const addTrefoilBtn = document.getElementById('add_trefoil_btn');
+        if (addTrefoilBtn) {
+            addTrefoilBtn.addEventListener('click', () => {
+                this.generateTrefoilFromUI();
+            });
+        }
     }
 
     createPrimitive (type, btn) {
         this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
         this.primitivesManager.CreatePrimitive(type);
-        document.querySelectorAll('.prim_btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.fitScene();
+    document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+        this.focusOnModel();
     }
 
     updateSelectedMaterial () {
@@ -286,6 +297,7 @@ class PrimitiveStudio {
         }
 
         this.viewer.SetModel(this.model);
+        this.focusOnModel();
     }
 
     bindResize () {
@@ -297,19 +309,7 @@ class PrimitiveStudio {
     }
 
     // Fallback in case original initUI didn't run or DOM race
-    fallbackPopulateBar () {
-    const types = ['cube', 'sphere', 'cylinder', 'cone', 'torus', 'plane'];
-        const bar = document.getElementById('primitive_bar');
-        types.forEach(type => {
-            const btn = document.createElement('button');
-            btn.textContent = type.substring(0, 3).toUpperCase();
-            btn.className = 'prim_btn';
-            btn.addEventListener('click', () => {
-                this.createPrimitive(type, btn);
-            });
-            bar.appendChild(btn);
-        });
-    }
+    // fallbackPopulateBar removed; no longer needed
 
     fitScene () {
         // Try to fit camera to model if there is at least one mesh
@@ -320,6 +320,43 @@ class PrimitiveStudio {
                 this.viewer.Render();
             }
         }
+    }
+
+    // More immediate camera focus after any object addition
+    focusOnModel () {
+        const sphere = this.viewer.GetBoundingSphere(() => true);
+        if (sphere && sphere.radius > 0) {
+            this.viewer.FitSphereToWindow(sphere, false);
+        }
+    }
+
+    initDebugOverlay () {
+        const overlay = document.createElement('div');
+        overlay.id = 'studio_debug_overlay';
+        overlay.style.position = 'absolute';
+        overlay.style.bottom = '8px';
+        overlay.style.right = '10px';
+        overlay.style.background = 'rgba(0,0,0,0.45)';
+        overlay.style.font = '11px monospace';
+        overlay.style.color = '#8fd1ff';
+        overlay.style.padding = '4px 6px';
+        overlay.style.border = '1px solid #2e3945';
+        overlay.style.borderRadius = '4px';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.zIndex = '20';
+        document.getElementById('studio_root').appendChild(overlay);
+        const update = () => {
+            const meshCount = this.model.MeshCount();
+            overlay.textContent = `Meshes:${meshCount}`;
+        };
+        setInterval(update, 1000);
+        update();
+        // Toggle with F2
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                overlay.style.display = (overlay.style.display === 'none') ? 'block' : 'none';
+            }
+        });
     }
 }
 

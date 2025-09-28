@@ -59,6 +59,8 @@
 		,"build_website_prod": "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=build/website/o3dv.website.min.js"
 		,"build_prod": "npm run update_version && npm run build_engine_prod && npm run build_website_prod"
 		,"build_dist": "node tools/create_dist_folder.cjs"
+		,"deploy_single": "npm run build_prod && npm run build_dist"
+		,"serve_dist": "npm run deploy_single && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
 	},
 	"devDependencies": {
 		"@types/node": "^20.1.0",

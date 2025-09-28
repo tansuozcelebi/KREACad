@@ -73,52 +73,6 @@ export function StartWebsite ()
         });
         website.Load ();
 
-        // Quick Action Buttons Wiring
-        const qaOpen = document.getElementById('qa_open');
-        const qaNew = document.getElementById('qa_new');
-        const qaSaveAs = document.getElementById('qa_saveas');
-        const qaHint = document.getElementById('qa_hint');
-        const fileInput = document.getElementById('open_file');
-
-        if (qaOpen && fileInput) {
-            qaOpen.addEventListener('click', () => {
-                fileInput.click();
-            });
-        }
-        if (qaNew) {
-            qaNew.addEventListener('click', () => {
-                // Navigate to create.html with 'new' parameter to show primitives bar
-                window.location.href = './create.html?mode=new';
-            });
-        }
-        if (qaSaveAs) {
-            // Listen for model load events to enable button
-            window.addEventListener('ov_model_loaded', () => {
-                qaSaveAs.disabled = false;
-                qaSaveAs.style.cursor = 'pointer';
-                qaSaveAs.style.background = '#1e2530';
-                qaSaveAs.style.color = '#fff';
-                if (qaHint) { qaHint.textContent = 'Model loaded. You can Export/Save.'; }
-            });
-            qaSaveAs.addEventListener('click', () => {
-                if (qaSaveAs.disabled) { return; }
-                // Reuse export dialog for Save As
-                if (window.OV && website && website.model && website.viewer) {
-                    window.OV.ShowExportDialog(website.model, website.viewer, {
-                        isMeshVisible : (meshInstanceId) => true
-                    });
-                } else {
-                    // fallback: try to trigger download of original files
-                    if (website && website.modelLoaderUI) {
-                        const importer = website.modelLoaderUI.GetImporter();
-                        if (importer) {
-                            window.OV.HandleEvent && window.OV.HandleEvent('model_downloaded', 'quick_save');
-                            window.OV.DownloadModel && window.OV.DownloadModel(importer);
-                        }
-                    }
-                }
-            });
-        }
     });
 }
 

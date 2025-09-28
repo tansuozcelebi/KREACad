@@ -11,6 +11,7 @@ import { ExporterSettings, ExporterModel } from './export/exportermodel.js';
 import { ExporterObj } from './export/exporterobj.js';
 import { ExporterOff } from './export/exporteroff.js';
 import { ExporterPly } from './export/exporterply.js';
+import { ExporterStep } from './export/exporterstep.js';
 import { ExporterStl } from './export/exporterstl.js';
 import { Box3D, BoundingBoxCalculator3D } from './geometry/box3d.js';
 import { Coord2D, CoordIsEqual2D, AddCoord2D, SubCoord2D, CoordDistance2D, DotVector2D } from './geometry/coord2d.js';
@@ -104,6 +105,7 @@ export {
     ExporterObj,
     ExporterOff,
     ExporterPly,
+    ExporterStep,
     ExporterStl,
     Box3D,
     BoundingBoxCalculator3D,

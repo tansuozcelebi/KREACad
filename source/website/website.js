@@ -700,6 +700,11 @@ export class Website
                 }
             });
         });
+        AddButton (this.toolbar, 'cube', Loc ('➕ New'), [], () => {
+            // Navigate to create.html with 'new' parameter to show primitives bar
+            window.location.href = './create.html?mode=new';
+        });
+        console.log('DEBUG: New button added to toolbar');
         AddSeparator (this.toolbar, ['only_on_model']);
         AddButton (this.toolbar, 'fit', Loc ('Fit model to window'), ['only_on_model'], () => {
             this.FitModelToWindow (false);

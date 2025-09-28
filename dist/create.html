@@ -5,7 +5,7 @@
 <title>KreaCAD Primitive Studio</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/png" href="/assets/logos/krea_logo.png" />
-<link rel="stylesheet" href="./build/website/o3dv.website.min.css" />
+<link rel="stylesheet" href="./o3dv.website.min.css" />
 <style>
 body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Quicksand,Helvetica,sans-serif; color:#eee; }
 #studio_root { position:relative; height:100%; width:100%; overflow:hidden; }
@@ -20,9 +20,32 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
 .control label { display:flex; justify-content:space-between; font-size:12px; text-transform:uppercase; opacity:.85; margin-bottom:4px; font-weight:600; letter-spacing:.75px; }
 .control input[type=range] { width:100%; accent-color:#3393bd; }
 #primitive_bar { display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:8px; margin-bottom:10px; }
-.prim_btn { width:38px; height:38px; border:1px solid #2e3945; border-radius:8px; background:#161b22; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#bcd; letter-spacing:.5px; }
-.prim_btn:hover { background:#222b35; }
-.prim_btn.active { outline:2px solid #3393bd; outline-offset:2px; }
+.prim_icon_btn {
+    width: auto;
+    min-width: 38px;
+    height: 34px;
+    border: 1px solid #2e3945;
+    border-radius: 6px;
+    background: #161b22;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #bcd;
+    letter-spacing: .5px;
+    padding: 0 12px;
+    margin: 0;
+    transition: background 0.15s;
+}
+.prim_icon_btn:hover {
+    background: #222b35;
+}
+.prim_icon_btn.active {
+    outline: 2px solid #3393bd;
+    outline-offset: 2px;
+}
 .footer_hint { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:12px; opacity:.75; letter-spacing:.5px; pointer-events:none; }
 #grid_canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 .param_group_title { margin:14px 0 6px; font-size:12px; font-weight:700; opacity:.65; letter-spacing:.75px; text-transform:uppercase; }
@@ -42,10 +65,40 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
         <button id="back_btn" title="Back to Main">⟵ Home</button>
         <button id="reset_cam_btn" title="Reset Camera">Reset Camera</button>
         <button id="clear_btn" title="Clear Scene">Clear</button>
+        <!-- Primitives Bar (inline, same height as toolbar buttons) -->
+        <div id="studio_primitives_bar" style="display:none; align-items:center; gap:6px; margin-left:18px;">
+            <button class="prim_icon_btn" data-prim="cube" title="Cube">
+                <img src="assets/icons/cube.svg" alt="Cube" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="sphere" title="Sphere">
+                <img src="assets/icons/sphere.svg" alt="Sphere" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="cylinder" title="Cylinder">
+                <img src="assets/icons/cylinder.svg" alt="Cylinder" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="cone" title="Cone">
+                <img src="assets/icons/cone.svg" alt="Cone" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="torus" title="Torus">
+                <img src="assets/icons/torus.svg" alt="Torus" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="plane" title="Plane">
+                <img src="assets/icons/plane.svg" alt="Plane" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="icosahedron" title="Icosahedron">
+                <img src="assets/icons/icosahedron.svg" alt="Icosahedron" width="16" height="16">
+            </button>
+            <button class="prim_icon_btn" data-prim="octahedron" title="Octahedron">
+                <img src="assets/icons/octahedron.svg" alt="Octahedron" width="16" height="16">
+            </button>
+            <button id="add_trefoil_btn" style="margin-left:10px; background:#2a5770; border:1px solid #34769a; color:#fff; font-weight:600; font-size:11px; border-radius:8px; cursor:pointer; height:34px; padding:0 14px;">
+                <img src="assets/icons/trefoil.svg" alt="Trefoil" width="16" height="16" style="margin-right:6px;">
+                Add Trefoil
+            </button>
+        </div>
     </div>
     <div id="param_panel">
         <h2>KreaCAD Primitive Studio</h2>
-        <div id="primitive_bar"></div>
         <div class="control">
             <label><span>Metalness</span><span id="metalness_val">0.00</span></label>
             <input id="metalness_slider" type="range" min="0" max="1" step="0.01" value="0" />
@@ -74,7 +127,39 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
     </div>
     <div class="footer_hint">WASD Move • QE Up/Down • RF Scale • TG Rotate • C Color • ESC Deselect</div>
 </div>
-<script type="module" src="./build/website/o3dv.website.min.js"></script>
+
+       <!-- KreaCAD Primitives Bar -->
+        <div class="primitives_bar" id="primitives_bar" style="display: none;">
+            <div class="primitives_title">Primitives</div>
+            <div class="primitives_icons">
+                <div class="primitive_icon" data-primitive="cube" title="Cube">
+                    <div class="icon_shape cube_icon">⬛</div>
+                </div>
+                <div class="primitive_icon" data-primitive="sphere" title="Sphere">
+                    <div class="icon_shape sphere_icon">⚫</div>
+                </div>
+                <div class="primitive_icon" data-primitive="cylinder" title="Cylinder">
+                    <div class="icon_shape cylinder_icon">🟫</div>
+                </div>
+                <div class="primitive_icon" data-primitive="cone" title="Cone">
+                    <div class="icon_shape cone_icon">🔺</div>
+                </div>
+                <div class="primitive_icon" data-primitive="torus" title="Torus">
+                    <div class="icon_shape torus_icon">⭕</div>
+                </div>
+                <div class="primitive_icon" data-primitive="plane" title="Plane">
+                    <div class="icon_shape plane_icon">⬜</div>
+                </div>
+                <div class="primitive_icon" data-primitive="icosahedron" title="Icosahedron">
+                    <div class="icon_shape icosahedron_icon">💎</div>
+                </div>
+                <div class="primitive_icon" data-primitive="octahedron" title="Octahedron">
+                    <div class="icon_shape octahedron_icon">♦</div>
+                </div>
+            </div>
+        </div>
+
+<script src="./o3dv.website.min.js"></script>
 <script type="module" src="./studio.js"></script>
 </body>
 </html>
