@@ -50,8 +50,8 @@ export function StartWebsite ()
     window.addEventListener ('load', () => {
         if (window.self !== window.top) {
             let noEmbeddingDiv = AddDiv (document.body, 'noembed');
-            AddDiv (noEmbeddingDiv, null, Loc ('Embedding Online 3D Viewer in an iframe is not supported.'));
-            let link = AddDomElement (noEmbeddingDiv, 'a', null, Loc ('Open Online 3D Viewer'));
+            AddDiv (noEmbeddingDiv, null, Loc ('Embedding KREACAd in an iframe is not supported.'));
+            let link = AddDomElement (noEmbeddingDiv, 'a', null, Loc ('Open KREACAd'));
             link.target = '_blank';
             link.href = window.self.location;
             return;

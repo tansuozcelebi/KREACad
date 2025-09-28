@@ -1,7 +1,7 @@
 {
-	"name": "online-3d-viewer",
+	"name": "kreacad",
 	"version": "0.15.0",
-	"description": "Online 3D Viewer",
+	"description": "KREACAd - Advanced 3D CAD Viewer",
 	"license": "MIT",
 	"type": "module",
 	"main": "./build/engine/o3dv.module.js",
@@ -37,7 +37,7 @@
 		"website/assets/envmaps/*"
 	],
 	"scripts": {
-		"start": "npm run build_website_dev && http-server",
+		"start": "npm run build_website_dev && http-server -a 127.0.0.1 --no-dotfiles -d false",
 		"test": "mocha test",
 		"lint": "eslint source",
 		"lint_fix": "eslint source --fix",
