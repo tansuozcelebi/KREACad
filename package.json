@@ -48,6 +48,7 @@
 		"build_website_dev": "npm run update_version && esbuild source/website/index.js --bundle --minify --global-name=OV --sourcemap --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js",
 		"build_website": "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js",
 		"build_dist": "npm run build_website && npm run copy_assets_to_dist",
+		"build_prod": "npm run update_version && npm run build_website && npm run copy_assets_to_dist",
 		"copy_assets_to_dist": "powershell -Command \"Copy-Item website/*.html dist/; Copy-Item website/*.xml dist/; Copy-Item website/robots.txt dist/; Copy-Item website/studio.js dist/; Copy-Item -Recurse website/assets dist/ -Force; Copy-Item -Recurse website/info dist/ -Force; Copy-Item website/.htaccess dist/\"",
 		"serve_dist": "npm run build_dist && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
 	},
