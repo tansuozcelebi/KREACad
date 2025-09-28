@@ -59,7 +59,7 @@ div.title_right a
 
 div.toolbar
 {
-	background: var(--ov_toolbar_background_color);
+	background: var(--kreacad_toolbar_background_color);
 }
 
 div.intro
@@ -206,32 +206,32 @@ div.main_viewer canvas
 	display: block;
 }
 
-div.ov_toolbar
+div.kreacad_toolbar
 {
 	overflow: auto;
 	user-select: none;
 }
 
-div.ov_toolbar div.ov_toolbar_button
+div.kreacad_toolbar div.kreacad_toolbar_button
 {
 	float: left;
 	cursor: pointer;
 	padding: 10px;
 }
 
-div.ov_toolbar div.ov_toolbar_button.align_right
+div.kreacad_toolbar div.kreacad_toolbar_button.align_right
 {
 	float: right;
 }
 
-div.ov_toolbar div.ov_toolbar_button.selected
+div.kreacad_toolbar div.kreacad_toolbar_button.selected
 {
-	background: var(--ov_toolbar_selected_color);
+	background: var(--kreacad_toolbar_selected_color);
 }
 
-div.ov_toolbar div.ov_toolbar_separator
+div.kreacad_toolbar div.kreacad_toolbar_separator
 {
-	background: var(--ov_toolbar_separator_color);
+	background: var(--kreacad_toolbar_separator_color);
 	width: 1px;
 	height: 28px;
 	margin: 5px 8px;

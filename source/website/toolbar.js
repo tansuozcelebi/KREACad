@@ -9,7 +9,7 @@ export class ToolbarButton
         this.imageTitle = imageTitle;
 
         this.selected = false;
-        this.buttonDiv = CreateDiv ('ov_toolbar_button');
+    this.buttonDiv = CreateDiv ('kreacad_toolbar_button');
         this.buttonImg = AddSvgIconElement (this.buttonDiv, this.image);
         if (onClick !== null) {
             this.buttonDiv.addEventListener ('click', onClick);
@@ -64,7 +64,7 @@ export class Toolbar
 {
     constructor (parentDiv)
     {
-        this.mainDiv = AddDiv (parentDiv, 'ov_toolbar');
+    this.mainDiv = AddDiv (parentDiv, 'kreacad_toolbar');
     }
 
     AddImageButton (image, imageTitle, onClick)
@@ -111,6 +111,6 @@ export class Toolbar
 
     AddSeparator ()
     {
-        return AddDiv (this.mainDiv, 'ov_toolbar_separator');
+    return AddDiv (this.mainDiv, 'kreacad_toolbar_separator');
     }
 }

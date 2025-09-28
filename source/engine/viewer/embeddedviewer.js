@@ -167,12 +167,16 @@ export class EmbeddedViewer
                     message = Loc ('No importable file found.');
                 } else if (importError.code === ImportErrorCode.FailedToLoadFile) {
                     message = Loc ('Failed to load file for import.');
+                    if (importError.mainFile) {
+                        message += ' ' + Loc ('Main file:') + ' ' + importError.mainFile + '.';
+                    }
                 } else if (importError.code === ImportErrorCode.ImportFailed) {
                     message = Loc ('Failed to import model.');
                 }
                 if (importError.message !== null) {
                     message += ' (' + importError.message + ')';
                 }
+                message += ' ' + Loc ('Check URL accessibility, CORS headers, and network connectivity.');
                 progressDiv.innerHTML = message;
             }
         });

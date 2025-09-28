@@ -29,11 +29,21 @@ function UnitToString (unit)
     return Loc ('Unknown');
 }
 
+// KreaCAD Material Database
+const MATERIALS_DATABASE = [
+    { name: 'Steel', density: 7.85, unit: 'kg/dm³' },
+    { name: 'Stainless Steel', density: 7.86, unit: 'kg/dm³' },
+    { name: 'Aluminium', density: 2.7, unit: 'kg/dm³' }
+];
+
 export class SidebarDetailsPanel extends SidebarPanel
 {
     constructor (parentDiv)
     {
         super (parentDiv);
+        this.selectedMaterial = MATERIALS_DATABASE[0]; // Default to Steel
+        this.currentObject3D = null;
+        this.currentModel = null;
     }
 
     GetName ()
@@ -49,10 +59,14 @@ export class SidebarDetailsPanel extends SidebarPanel
     AddObject3DProperties (model, object3D)
     {
         this.Clear ();
+        this.currentModel = model;
+        this.currentObject3D = object3D;
+
         let table = AddDiv (this.contentDiv, 'ov_property_table');
         let boundingBox = GetBoundingBox (object3D);
         let size = SubCoord3D (boundingBox.max, boundingBox.min);
         let unit = model.GetUnit ();
+
         this.AddProperty (table, new Property (PropertyType.Integer, Loc ('Vertices'), object3D.VertexCount ()));
         let lineSegmentCount = object3D.LineSegmentCount ();
         if (lineSegmentCount > 0) {
@@ -68,6 +82,12 @@ export class SidebarDetailsPanel extends SidebarPanel
         this.AddProperty (table, new Property (PropertyType.Number, Loc ('Size X'), size.x));
         this.AddProperty (table, new Property (PropertyType.Number, Loc ('Size Y'), size.y));
         this.AddProperty (table, new Property (PropertyType.Number, Loc ('Size Z'), size.z));
+
+        // KreaCAD Material Selection
+        this.AddMaterialDropdown (table);
+
+        // Density property
+        this.AddProperty (table, new Property (PropertyType.Text, Loc ('Density'), this.selectedMaterial.density + ' ' + this.selectedMaterial.unit));
         this.AddCalculatedProperty (table, Loc ('Volume'), () => {
             if (!IsTwoManifold (object3D)) {
                 return null;
@@ -78,6 +98,27 @@ export class SidebarDetailsPanel extends SidebarPanel
         this.AddCalculatedProperty (table, Loc ('Surface'), () => {
             const surfaceArea = CalculateSurfaceArea (object3D);
             return new Property (PropertyType.Number, null, surfaceArea);
+        });
+        // KreaCAD Weight Calculation
+        this.AddCalculatedProperty (table, Loc ('Weight'), () => {
+            if (!IsTwoManifold (object3D)) {
+                return null;
+            }
+            const volume = CalculateVolume (object3D);
+            if (volume <= 0) {
+                return null;
+            }
+            // Convert volume from model units to dm³ if needed
+            let volumeInDm3 = volume;
+            if (unit === Unit.Millimeter) {
+                volumeInDm3 = volume / 1000; // mm³ to dm³
+            } else if (unit === Unit.Centimeter) {
+                volumeInDm3 = volume; // cm³ = dm³
+            } else if (unit === Unit.Meter) {
+                volumeInDm3 = volume * 1000; // m³ to dm³
+            }
+            const weight = volumeInDm3 * this.selectedMaterial.density;
+            return new Property (PropertyType.Text, null, weight.toFixed(2) + ' kg');
         });
         if (object3D.PropertyGroupCount () > 0) {
             let customTable = AddDiv (this.contentDiv, 'ov_property_table ov_property_table_custom');
@@ -209,5 +250,53 @@ export class SidebarDetailsPanel extends SidebarPanel
             targetDiv.innerHTML = valueHtml;
             targetDiv.setAttribute ('title', valueTitle !== null ? valueTitle : valueHtml);
         }
+    }
+
+    AddMaterialDropdown (table)
+    {
+        console.log('AddMaterialDropdown called'); // Debug
+
+        // Basit bir property olarak ekleyelim önce
+        this.AddProperty (table, new Property (PropertyType.Text, 'Material', 'Steel (7.85 kg/dm³)'));
+
+        // Şimdi dropdown'u deneyelim
+        let row = AddDiv (table, 'ov_property_table_row');
+        let name = AddDiv (row, 'ov_property_table_name');
+        let value = AddDiv (row, 'ov_property_table_value');
+
+        name.innerHTML = 'Material Selection'; // Loc kullanmadan test
+        console.log('Material label added'); // Debug
+
+        let select = AddDomElement (value, 'select', 'ov_material_dropdown');
+        select.style.width = '100%';
+        select.style.padding = '4px';
+        select.style.border = '1px solid #ccc';
+        select.style.borderRadius = '4px';
+        select.style.backgroundColor = 'white';
+        select.style.fontSize = '12px';
+        console.log('Select element created'); // Debug
+
+        // Add options to dropdown
+        for (let i = 0; i < MATERIALS_DATABASE.length; i++) {
+            let material = MATERIALS_DATABASE[i];
+            let option = AddDomElement (select, 'option', null);
+            option.value = i;
+            option.innerHTML = material.name + ' (' + material.density + ' ' + material.unit + ')';
+            if (material === this.selectedMaterial) {
+                option.selected = true;
+            }
+            console.log('Added material option:', material.name); // Debug
+        }
+
+        // Handle material change
+        select.addEventListener ('change', (event) => {
+            let selectedIndex = parseInt(event.target.value);
+            this.selectedMaterial = MATERIALS_DATABASE[selectedIndex];
+
+            // Refresh the panel to update density and weight calculations
+            if (this.currentModel && this.currentObject3D) {
+                this.AddObject3DProperties(this.currentModel, this.currentObject3D);
+            }
+        });
     }
 }

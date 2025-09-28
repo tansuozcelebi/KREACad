@@ -191,6 +191,15 @@ export class Importer
             let error = new ImportError (ImportErrorCode.FailedToLoadFile);
             if (mainFile !== null && mainFile.file !== null) {
                 error.mainFile = mainFile.file.name;
+                // attach diagnostics
+                if (mainFile.file.loadStatus !== null) {
+                    error.message = 'HTTP status: ' + mainFile.file.loadStatus;
+                } else if (mainFile.file.errorType !== null) {
+                    error.message = 'Network error type: ' + mainFile.file.errorType;
+                }
+                if (mainFile.file.originalUrl) {
+                    error.message = (error.message ? error.message + ', ' : '') + 'URL: ' + mainFile.file.originalUrl;
+                }
             }
             callbacks.onImportError (error);
             return;
@@ -239,6 +248,14 @@ export class Importer
                 let error = new ImportError (ImportErrorCode.ImportFailed);
                 error.mainFile = mainFile.file.name;
                 error.message = importer.GetErrorMessage ();
+                if (!error.message || error.message.length === 0) {
+                    if (this.missingFiles.length > 0) {
+                        error.message = 'Missing referenced files: ' + this.missingFiles.slice (0, 5).join (', ');
+                        if (this.missingFiles.length > 5) {
+                            error.message += ' …';
+                        }
+                    }
+                }
                 callbacks.onImportError (error);
             },
             onComplete : () => {

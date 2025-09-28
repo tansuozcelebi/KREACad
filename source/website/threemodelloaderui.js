@@ -80,10 +80,22 @@ export class ThreeModelLoaderUI
                 null
             );
         } else if (importError.code === ImportErrorCode.FailedToLoadFile) {
+            let details = [];
+            if (importError.mainFile) {
+                details.push (Loc ('Main file:') + ' ' + importError.mainFile);
+            }
+            if (importError.message) {
+                details.push (importError.message);
+            }
+            details.push (Loc ('The remote server might have refused the request (CORS, 404, or network error).') + ' ' + Loc ('Check that:'));
+            details.push ('- ' + Loc ('The URL is correct and accessible directly in a browser.'));
+            details.push ('- ' + Loc ('The server sends Access-Control-Allow-Origin header ("*") or your domain.'));
+            details.push ('- ' + Loc ('No corporate/VPN/firewall blocks the request.'));
+            const detailText = details.join ('\n');
             return ShowMessageDialog (
                 Loc ('Something went wrong'),
                 Loc ('Failed to load file for import.'),
-                Loc ('The remote server refused to fulfill the request. Check if the url is correct, and make sure that CORS requests are allowed on the remote server.')
+                detailText
             );
         } else if (importError.code === ImportErrorCode.ImportFailed) {
             return ShowMessageDialog (

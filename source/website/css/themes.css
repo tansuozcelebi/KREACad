@@ -17,9 +17,9 @@
 	--ov_hover_text_color: #3393bd;
 	--ov_logo_text_color: #15334a;
 	--ov_logo_border_color: #000000;
-	--ov_toolbar_background_color: #f5f5f5;
-	--ov_toolbar_selected_color: #e1e1e1;
-	--ov_toolbar_separator_color: #cccccc;
+	--kreacad_toolbar_background_color: #f5f5f5;
+	--kreacad_toolbar_selected_color: #e1e1e1;
+	--kreacad_toolbar_separator_color: #cccccc;
 	--ov_treeview_selected_color: #eeeeee;
     --ov_dialog_foreground_color: #000000;
     --ov_dialog_background_color: #ffffff;
@@ -44,9 +44,9 @@
 	--ov_hover_text_color_dark: #fafafa;
 	--ov_logo_text_color_dark: #fafafa;
 	--ov_logo_border_color_dark: #2a2b2e;
-	--ov_toolbar_background_color_dark: #3d3e42;
-	--ov_toolbar_selected_color_dark: #272727;
-	--ov_toolbar_separator_color_dark: #888888;
+	--kreacad_toolbar_background_color_dark: #3d3e42;
+	--kreacad_toolbar_selected_color_dark: #272727;
+	--kreacad_toolbar_separator_color_dark: #888888;
 	--ov_treeview_selected_color_dark: #38393d;
     --ov_dialog_foreground_color_dark: #fafafa;
     --ov_dialog_background_color_dark: #3c3c40;

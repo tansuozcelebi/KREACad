@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>KreaCAD Primitive Studio</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/png" href="/assets/logos/krea_logo.png" />
+<link rel="stylesheet" href="./build/website/o3dv.website.min.css" />
+<style>
+body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Quicksand,Helvetica,sans-serif; color:#eee; }
+#studio_root { position:relative; height:100%; width:100%; overflow:hidden; }
+#studio_toolbar { position:absolute; top:12px; left:12px; display:flex; gap:8px; z-index:10; }
+#studio_toolbar button { background:#1d232b; border:1px solid #2e3945; color:#fff; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:600; letter-spacing:.5px; }
+#studio_toolbar button:hover { background:#2b3540; }
+#viewer_canvas { position:absolute; inset:0; width:100%; height:100%; outline:none; }
+#ground_overlay { position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; background:radial-gradient(circle at 50% 55%, rgba(255,255,255,0.08), rgba(0,0,0,0.85)); mix-blend-mode:screen; opacity:.6; }
+#param_panel { position:absolute; top:12px; right:12px; width:260px; background:rgba(20,24,30,0.85); backdrop-filter:blur(12px); border:1px solid #2e3945; border-radius:14px; padding:16px 18px 18px; box-shadow:0 10px 28px -6px rgba(0,0,0,.55); }
+#param_panel h2 { margin:0 0 10px; font-size:17px; font-weight:600; letter-spacing:.5px; }
+.control { margin-bottom:14px; }
+.control label { display:flex; justify-content:space-between; font-size:12px; text-transform:uppercase; opacity:.85; margin-bottom:4px; font-weight:600; letter-spacing:.75px; }
+.control input[type=range] { width:100%; accent-color:#3393bd; }
+#primitive_bar { display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:8px; margin-bottom:10px; }
+.prim_btn { width:38px; height:38px; border:1px solid #2e3945; border-radius:8px; background:#161b22; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#bcd; letter-spacing:.5px; }
+.prim_btn:hover { background:#222b35; }
+.prim_btn.active { outline:2px solid #3393bd; outline-offset:2px; }
+.footer_hint { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:12px; opacity:.75; letter-spacing:.5px; pointer-events:none; }
+#grid_canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.param_group_title { margin:14px 0 6px; font-size:12px; font-weight:700; opacity:.65; letter-spacing:.75px; text-transform:uppercase; }
+.inline_row { display:flex; gap:6px; }
+.inline_row input { flex:1; background:#12161c; border:1px solid #2e3945; padding:6px 8px; color:#d4dde7; border-radius:6px; font-size:12px; }
+#generate_trefoil { margin-top:8px; width:100%; background:#2a5770; border:1px solid #34769a; padding:9px 12px; color:#fff; font-weight:600; border-radius:8px; cursor:pointer; }
+#generate_trefoil:hover { background:#327193; }
+.small_hint { font-size:10px; opacity:.5; margin-top:4px; }
+</style>
+</head>
+<body>
+<div id="studio_root">
+    <canvas id="viewer_canvas"></canvas>
+    <canvas id="grid_canvas"></canvas>
+    <div id="ground_overlay"></div>
+    <div id="studio_toolbar">
+        <button id="back_btn" title="Back to Main">⟵ Home</button>
+        <button id="reset_cam_btn" title="Reset Camera">Reset Camera</button>
+        <button id="clear_btn" title="Clear Scene">Clear</button>
+    </div>
+    <div id="param_panel">
+        <h2>KreaCAD Primitive Studio</h2>
+        <div id="primitive_bar"></div>
+        <div class="control">
+            <label><span>Metalness</span><span id="metalness_val">0.00</span></label>
+            <input id="metalness_slider" type="range" min="0" max="1" step="0.01" value="0" />
+        </div>
+        <div class="control">
+            <label><span>Roughness</span><span id="roughness_val">1.00</span></label>
+            <input id="roughness_slider" type="range" min="0" max="1" step="0.01" value="1" />
+        </div>
+        <div class="control">
+            <label><span>Opacity</span><span id="opacity_val">1.00</span></label>
+            <input id="opacity_slider" type="range" min="0.05" max="1" step="0.01" value="1" />
+        </div>
+        <div class="param_group_title">Trefoil (Experimental)</div>
+        <div class="inline_row">
+            <input id="trefoil_a" type="number" step="0.1" value="2.0" title="a" placeholder="a" />
+            <input id="trefoil_b" type="number" step="0.1" value="0.6" title="b" placeholder="b" />
+            <input id="trefoil_q" type="number" step="1" value="3" title="q" placeholder="q" />
+        </div>
+        <div class="inline_row" style="margin-top:6px;">
+            <input id="trefoil_tube" type="number" step="0.05" value="0.25" title="tube radius" placeholder="tube" />
+            <input id="trefoil_seg_u" type="number" step="1" value="180" title="segments U" placeholder="segU" />
+            <input id="trefoil_seg_v" type="number" step="1" value="24" title="segments V" placeholder="segV" />
+        </div>
+        <button id="generate_trefoil">Generate Trefoil</button>
+        <div class="small_hint">a,b,q,tube,segU,segV parametreleri ile trefoil tüp oluşturulur.</div>
+    </div>
+    <div class="footer_hint">WASD Move • QE Up/Down • RF Scale • TG Rotate • C Color • ESC Deselect</div>
+</div>
+<script type="module" src="./build/website/o3dv.website.min.js"></script>
+<script type="module" src="./studio.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+/* KreaCAD Primitives System Styles */
+
+.intro_create_new {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.intro_create_title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.intro_create_button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.intro_create_button:hover {
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.create_icon {
+    font-size: 18px;
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+/* Primitives Bar Styles */
+.primitives_bar {
+    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+    border-bottom: 2px solid #ddd;
+    padding: 8px 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.primitives_title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.primitives_icons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.primitive_icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.primitive_icon:hover {
+    border-color: #4CAF50;
+    background: #f8fff8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.primitive_icon.active {
+    border-color: #4CAF50;
+    background: #e8f5e8;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.icon_shape {
+    font-size: 24px;
+    line-height: 1;
+    user-select: none;
+}
+
+/* Different primitive icon colors */
+.cube_icon { color: #FF6B6B; }
+.sphere_icon { color: #4ECDC4; }
+.cylinder_icon { color: #45B7D1; }
+.cone_icon { color: #96CEB4; }
+.torus_icon { color: #FFEAA7; }
+.plane_icon { color: #DDA0DD; }
+.icosahedron_icon { color: #FFB6C1; }
+.octahedron_icon { color: #98FB98; }
+
+/* Primitive object selection styles */
+.primitive_object_selected {
+    outline: 3px solid #4CAF50 !important;
+    outline-offset: 2px;
+}
+
+.primitive_object_hover {
+    outline: 2px solid #81C784 !important;
+    outline-offset: 1px;
+}
+
+/* Transform controls info */
+#transform_info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Segoe UI', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+#transform_info.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.transform_info.show {
+    display: block;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .primitives_icons {
+        gap: 8px;
+    }
+
+    .primitive_icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .icon_shape {
+        font-size: 20px;
+    }
+}

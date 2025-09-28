@@ -49,6 +49,10 @@ export class ImporterFile
         this.source = source;
         this.data = data;
         this.content = null;
+        // Diagnostics fields populated if loading fails
+        this.loadStatus = null; // http status code if available
+        this.errorType = null; // 'http', 'network', 'timeout'
+        this.originalUrl = (source === FileSource.Url ? data : null);
     }
 
     SetContent (content)
@@ -147,7 +151,20 @@ export class ImporterFileList
         }
         let loaderPromise = null;
         if (file.source === FileSource.Url) {
-            loaderPromise = RequestUrl (file.data, callbacks.onProgress);
+            loaderPromise = RequestUrl (file.data, callbacks.onProgress).then ((response) => {
+                file.loadStatus = 200;
+                return response;
+            }).catch ((err) => {
+                if (err && err.status) {
+                    file.loadStatus = err.status;
+                    file.errorType = 'http';
+                } else if (err && err.type) {
+                    file.errorType = err.type; // e.g. 'timeout'
+                } else {
+                    file.errorType = 'network';
+                }
+                throw err;
+            });
         } else if (file.source === FileSource.File) {
             loaderPromise = ReadFile (file.data, callbacks.onProgress);
         } else {

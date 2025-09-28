@@ -4,10 +4,10 @@
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no">
-    <link rel="icon" type="image/png" href="assets/images/3dviewer_net_favicon.ico">
-    <link rel="canonical" href="https://3dviewer.net">
+    <link rel="icon" type="image/png" href="assets/images/krea_favicon.png">
+    <!-- <link rel="canonical" href="#"> -->
 
-    <title>KREACAd - Advanced 3D CAD Viewer</title>
+    <title>KreaCAD - Advanced 3D CAD Viewer</title>
 
     <!-- meta start -->
     <!-- meta end -->
@@ -39,17 +39,65 @@
 
 <body>
     <input type="file" id="open_file" style="display:none;" multiple></input>
+
+    <!-- KreaCAD Version Display -->
+    <div id="kreacad_version_display" style="
+        position: fixed;
+        top: 10px;
+        right: 15px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #ffffff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-family: monospace;
+        z-index: 9999;
+        user-select: none;
+        opacity: 0.8;
+    ">v1.0.0</div>
+
     <div class="header" id="header">
         <div class="title">
             <div class="title_left">
                 <a href="index.html">
-                    <svg class="logo_image"><use href="assets/images/3dviewer_net_logo_text.svg#logo"></use></svg>
+                    <img class="logo_image" src="assets/logos/krea_logo.png" alt="KreaCAD" style="height: 32px;">
                 </a>
             </div>
             <div class="title_right" id="header_buttons"></div>
             <div class="main_file_name only_full_width" id="main_file_name"></div>
         </div>
         <div class="toolbar" id="toolbar"></div>
+
+        <!-- KreaCAD Primitives Bar -->
+        <div class="primitives_bar" id="primitives_bar" style="display: none;">
+            <div class="primitives_title">Primitives</div>
+            <div class="primitives_icons">
+                <div class="primitive_icon" data-primitive="cube" title="Cube">
+                    <div class="icon_shape cube_icon">⬛</div>
+                </div>
+                <div class="primitive_icon" data-primitive="sphere" title="Sphere">
+                    <div class="icon_shape sphere_icon">⚫</div>
+                </div>
+                <div class="primitive_icon" data-primitive="cylinder" title="Cylinder">
+                    <div class="icon_shape cylinder_icon">🟫</div>
+                </div>
+                <div class="primitive_icon" data-primitive="cone" title="Cone">
+                    <div class="icon_shape cone_icon">🔺</div>
+                </div>
+                <div class="primitive_icon" data-primitive="torus" title="Torus">
+                    <div class="icon_shape torus_icon">⭕</div>
+                </div>
+                <div class="primitive_icon" data-primitive="plane" title="Plane">
+                    <div class="icon_shape plane_icon">⬜</div>
+                </div>
+                <div class="primitive_icon" data-primitive="icosahedron" title="Icosahedron">
+                    <div class="icon_shape icosahedron_icon">💎</div>
+                </div>
+                <div class="primitive_icon" data-primitive="octahedron" title="Octahedron">
+                    <div class="icon_shape octahedron_icon">♦</div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="main" id="main">
         <div class="main_left_container only_full_width" id="main_left_container">
@@ -64,8 +112,15 @@
     </div>
     <div class="intro ov_thin_scrollbar" id="intro">
         <div class="intro_content" id="intro_content">
+            <!-- KreaCAD Quick Actions -->
+            <div class="intro_quick_actions" style="display:flex; gap:10px; flex-wrap:wrap; margin:0 0 16px; align-items:center;">
+                <button id="qa_open" style="background:#1e2530; border:1px solid #2d3742; color:#fff; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.5px;">📂 Open</button>
+                <button id="qa_new" style="background:#1e2530; border:1px solid #2d3742; color:#fff; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.5px;">➕ New</button>
+                <button id="qa_saveas" disabled style="background:#2a3038; border:1px solid #2d3742; color:#88939f; padding:8px 14px; border-radius:6px; cursor:not-allowed; font-size:13px; font-weight:600; letter-spacing:.5px;">💾 Save As...</button>
+                <span id="qa_hint" style="font-size:12px; opacity:.55;">Load a model to enable Save As</span>
+            </div>
             <div class="intro_logo">
-                <svg class="intro_logo"><use href="assets/images/3dviewer_net_logo_text.svg#logo"></use></svg>
+                <img class="intro_logo" src="assets/logos/krea_logo.png" alt="KreaCAD" style="max-width: 200px;">
                 <div class="intro_dragdrop_text" id="intro_dragdrop_text"></div>
             </div>
             <div class="intro_formats">
@@ -89,6 +144,15 @@
                     <a href="#model=assets/models/cube.off">off</a>
                     <a href="#model=assets/models/cow.ply">ply</a>
                     <a href="#model=assets/models/extrusion3.wrl">wrl</a>
+                </div>
+
+                <!-- KreaCAD Create New Section -->
+                <div class="intro_create_new">
+                    <div class="intro_create_title">Create a new:</div>
+                    <a class="intro_create_button" id="create_new_button" href="./create.html" style="text-decoration:none;">
+                        <span class="create_icon">+</span>
+                        <span>Open Primitive Studio</span>
+                    </a>
                 </div>
             </div>
             <!-- intro footer start -->

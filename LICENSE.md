@@ -1,6 +1,10 @@
 MIT License
 
+Copyright (c) 2025 Tansu Ozcelebi
 Copyright (c) 2023 Viktor Kovacs
+
+Evet yeni özellikler eklendi, Yapay zeka eseri bu gelişim hızını mümkün oldukça hızlandırdı.
+
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

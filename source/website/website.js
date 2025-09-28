@@ -23,12 +23,15 @@ import { GetDefaultMaterials, ReplaceDefaultMaterialsColor } from '../engine/mod
 import { Direction } from '../engine/geometry/geometry.js';
 import { CookieGetBoolVal, CookieSetBoolVal } from './cookiehandler.js';
 import { MeasureTool } from './measuretool.js';
+import { KreaCAD_VERSION } from './version.js';
 import { CloseAllDialogs } from './dialog.js';
 import { CreateVerticalSplitter } from './splitter.js';
 import { EnumeratePlugins, PluginType } from './pluginregistry.js';
 import { EnvironmentSettings } from '../engine/viewer/shadingmodel.js';
 import { IntersectionMode } from '../engine/viewer/viewermodel.js';
 import { Loc } from '../engine/core/localization.js';
+import { PrimitivesManager } from './primitivesmanager.js';
+import { Model } from '../engine/model/model.js';
 
 const WebsiteUIState =
 {
@@ -202,6 +205,8 @@ export class Website
         this.uiState = WebsiteUIState.Undefined;
         this.layouter = new WebsiteLayouter (this.parameters, this.navigator, this.sidebar, this.viewer, this.measureTool);
         this.model = null;
+        this.primitivesModel = new Model ();
+        this.primitivesManager = null;
     }
 
     Load ()
@@ -234,12 +239,36 @@ export class Website
         this.layouter.Init ();
         this.SetUIState (WebsiteUIState.Intro);
 
+        // Initialize PrimitivesManager
+        this.primitivesManager = new PrimitivesManager (this.viewer, this.primitivesModel);
+
+        // KreaCAD Version Display
+        this.AddVersionDisplay();
+
         this.hashHandler.SetEventListener (this.OnHashChange.bind (this));
         this.OnHashChange ();
 
         window.addEventListener ('resize', () => {
 			this.layouter.Resize ();
 		});
+    }
+
+    // Start an empty scene for primitive creation on main viewer
+    StartEmptyScene ()
+    {
+        // Switch UI to model view
+        this.SetUIState (WebsiteUIState.Model);
+        // Ensure viewer uses the primitives model
+        this.viewer.SetModel (this.primitivesModel);
+        // Show primitives bar if hidden
+        const primitivesBar = document.getElementById ('primitives_bar');
+        if (primitivesBar && primitivesBar.style.display === 'none') {
+            primitivesBar.style.display = 'block';
+        }
+        if (this.primitivesManager && !this.primitivesManager.isEnabled) {
+            this.primitivesManager.isEnabled = true;
+            this.primitivesManager.ShowTransformInfo && this.primitivesManager.ShowTransformInfo ();
+        }
     }
 
     HasLoadedModel ()
@@ -976,5 +1005,61 @@ export class Website
             CookieSetBoolVal ('ov_cookie_consent', true);
             popupDiv.remove ();
         });
+    }
+
+    AddVersionDisplay ()
+    {
+        console.log('AddVersionDisplay called'); // Debug
+        console.log('KreaCAD_VERSION:', KreaCAD_VERSION); // Debug
+
+        // Update the HTML version div
+        setTimeout(() => {
+            let versionDiv = document.getElementById('kreacad_version_display');
+            if (versionDiv) {
+                versionDiv.innerHTML = KreaCAD_VERSION.fullVersion;
+                versionDiv.title = `KreaCAD ${KreaCAD_VERSION.version}\nBuild: ${KreaCAD_VERSION.build}\nBuilt: ${new Date(KreaCAD_VERSION.timestamp).toLocaleString()}`;
+                console.log('Version updated to:', KreaCAD_VERSION.fullVersion);
+            } else {
+                console.log('Version div not found!');
+                // Fallback: create manually
+                this.CreateVersionElement();
+            }
+        }, 100);
+    }
+
+    CreateVersionElement ()
+    {
+        console.log('Creating version element'); // Debug
+
+        // Remove existing version display if any
+        let existingVersion = document.querySelector('#kreacad_version_display');
+        if (existingVersion) {
+            existingVersion.remove();
+        }
+
+        // Add version display to the top-right corner
+        let versionDiv = AddDiv (document.body, 'kreacad_version_display');
+        versionDiv.id = 'kreacad_version_display';
+        versionDiv.innerHTML = KreaCAD_VERSION.fullVersion;
+
+        // Style the version display
+        versionDiv.style.position = 'fixed';
+        versionDiv.style.top = '10px';
+        versionDiv.style.right = '15px';
+        versionDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        versionDiv.style.color = '#ffffff';
+        versionDiv.style.padding = '4px 8px';
+        versionDiv.style.borderRadius = '4px';
+        versionDiv.style.fontSize = '11px';
+        versionDiv.style.fontFamily = 'monospace';
+        versionDiv.style.zIndex = '9999';
+        versionDiv.style.userSelect = 'none';
+        versionDiv.style.pointerEvents = 'auto';
+        versionDiv.style.opacity = '0.8';
+
+        // Add tooltip
+        versionDiv.title = `KreaCAD ${KreaCAD_VERSION.version}\nBuild: ${KreaCAD_VERSION.build}\nBuilt: ${new Date(KreaCAD_VERSION.timestamp).toLocaleString()}`;
+
+        console.log('Version element created:', versionDiv); // Debug
     }
 }
