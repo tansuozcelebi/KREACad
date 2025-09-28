@@ -1,2 +1,68 @@
+# KreaCAD - Advanced 3D CAD Viewer & Measurement Tool
+# Robots.txt for Search Engine Optimization
+
 User-agent: *
 Allow: /
+
+# Allow access to main pages and assets
+Allow: /website/
+Allow: /assets/
+Allow: /build/
+
+# Disallow development and internal files
+Disallow: /source/
+Disallow: /test/
+Disallow: /tools/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /docs/source/
+Disallow: /sandbox/
+Disallow: /*.min.js$
+Disallow: /*.min.css$
+
+# Allow specific file formats that showcase CAD capabilities
+Allow: /*.step$
+Allow: /*.stp$
+Allow: /*.iges$
+Allow: /*.igs$
+Allow: /*.3dm$
+Allow: /*.obj$
+Allow: /*.stl$
+Allow: /*.gltf$
+Allow: /*.glb$
+
+# Special rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 3
+
+# Sitemap location
+Sitemap: https://kreacad.com/sitemap.xml
+Sitemap: https://kreacad.com/sitemap-en.xml
+Sitemap: https://kreacad.com/sitemap-zh.xml
+Sitemap: https://kreacad.com/sitemap-ja.xml
+Sitemap: https://kreacad.com/sitemap-de.xml
+Sitemap: https://kreacad.com/sitemap-fr.xml
+Sitemap: https://kreacad.com/sitemap-es.xml
+Sitemap: https://kreacad.com/sitemap-da.xml
+Sitemap: https://kreacad.com/sitemap-nl.xml
+Sitemap: https://kreacad.com/sitemap-it.xml
+
+# Cache control
+Cache-control: public, max-age=86400

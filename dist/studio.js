@@ -73,14 +73,14 @@ class PrimitiveStudio {
     this.fitScene();
         // No longer auto-populate primitive_bar; handled by static HTML in toolbar
 
+        // Show the primitives bar by default
+        const primitivesBar = document.getElementById('studio_primitives_bar');
+        if (primitivesBar) {
+            primitivesBar.style.display = 'flex';
+        }
+
         // Only add default cube and show primitives if in 'new' mode
         if (mode === 'new') {
-            // Show the primitives bar
-            const primitivesBar = document.getElementById('studio_primitives_bar');
-            if (primitivesBar) {
-                primitivesBar.style.display = 'flex';
-            }
-
             // Add a default cube so the scene isn't empty/dark
             if (this.model.MeshCount() === 0) {
                 this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
@@ -174,12 +174,6 @@ class PrimitiveStudio {
                 btn.classList.add('active');
             });
         });
-        const addTrefoilBtn = document.getElementById('add_trefoil_btn');
-        if (addTrefoilBtn) {
-            addTrefoilBtn.addEventListener('click', () => {
-                this.generateTrefoilFromUI();
-            });
-        }
     }
 
     createPrimitive (type, btn) {

@@ -860,10 +860,10 @@ export class Website
         meta.innerText = `Build: ${KreaCAD_VERSION.build} | Built: ${new Date(KreaCAD_VERSION.timestamp).toLocaleString()}`;
 
         try {
-            dialog.Show();
-            console.log('[ShowAboutDialog] dialog.Show() executed');
+            dialog.Open();
+            console.log('[ShowAboutDialog] dialog.Open() executed');
         } catch (e) {
-            console.error('[ShowAboutDialog] dialog.Show failed:', e);
+            console.error('[ShowAboutDialog] dialog.Open failed:', e);
         }
 
         // Apply flight animation class after mount

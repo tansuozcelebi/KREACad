@@ -5,7 +5,7 @@
 <title>KreaCAD Primitive Studio</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/png" href="/assets/logos/krea_logo.png" />
-<link rel="stylesheet" href="./o3dv.website.min.css" />
+<link rel="stylesheet" href="../build/website_dev/o3dv.website.min.css" />
 <style>
 body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Quicksand,Helvetica,sans-serif; color:#eee; }
 #studio_root { position:relative; height:100%; width:100%; overflow:hidden; }
@@ -66,7 +66,7 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
         <button id="reset_cam_btn" title="Reset Camera">Reset Camera</button>
         <button id="clear_btn" title="Clear Scene">Clear</button>
         <!-- Primitives Bar (inline, same height as toolbar buttons) -->
-        <div id="studio_primitives_bar" style="display:none; align-items:center; gap:6px; margin-left:18px;">
+        <div id="studio_primitives_bar" style="display:flex; align-items:center; gap:6px; margin-left:18px;">
             <button class="prim_icon_btn" data-prim="cube" title="Cube">
                 <img src="assets/icons/cube.svg" alt="Cube" width="16" height="16">
             </button>
@@ -91,9 +91,8 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
             <button class="prim_icon_btn" data-prim="octahedron" title="Octahedron">
                 <img src="assets/icons/octahedron.svg" alt="Octahedron" width="16" height="16">
             </button>
-            <button id="add_trefoil_btn" style="margin-left:10px; background:#2a5770; border:1px solid #34769a; color:#fff; font-weight:600; font-size:11px; border-radius:8px; cursor:pointer; height:34px; padding:0 14px;">
-                <img src="assets/icons/trefoil.svg" alt="Trefoil" width="16" height="16" style="margin-right:6px;">
-                Add Trefoil
+            <button class="prim_icon_btn" data-prim="trefoil" title="Trefoil Knot">
+                <img src="assets/icons/trefoil.svg" alt="Trefoil" width="16" height="16">
             </button>
         </div>
     </div>
@@ -159,7 +158,7 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
             </div>
         </div>
 
-<script src="./o3dv.website.min.js"></script>
+<script src="../build/website_dev/o3dv.website.min.js"></script>
 <script type="module" src="./studio.js"></script>
 </body>
 </html>
