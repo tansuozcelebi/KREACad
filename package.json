@@ -49,17 +49,15 @@
 		"create_package_test": "npm run generate_docs && npm run build_engine && npm run build_engine_module && npm run build_website && run-python3 tools/create_package.py test",
 		"generate_docs": "run-python3 tools/generate_docs.py",
 		"build_dev": "npm run update_version && npm run build_engine_dev && npm run build_website_dev",
-		"build_engine_dev": "npm run update_engine_exports && esbuild source/engine/main.js --bundle --minify --global-name=OV --sourcemap --outfile=build/engine_dev/o3dv.min.js",
-		"build_engine": "npm run update_engine_exports && esbuild source/engine/main.js --bundle --minify --global-name=OV --outfile=build/engine/o3dv.min.js",
+		"build_engine_dev": "npm run update_engine_exports && esbuild source/engine/main.js --bundle --minify --global-name=OV --sourcemap --outfile=dist/o3dv.min.js",
+		"build_engine": "npm run update_engine_exports && esbuild source/engine/main.js --bundle --minify --global-name=OV --outfile=dist/o3dv.min.js",
 		"build_engine_module": "npm run update_engine_exports && rollup --config tools/rollup.js && tsc --project tools/tsconfig.json",
-		"build_website_dev": "npm run update_version && esbuild source/website/index.js --bundle --minify --global-name=OV --sourcemap --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=build/website_dev/o3dv.website.min.js",
-		"build_website": "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=build/website/o3dv.website.min.js",
-		"update_engine_exports": "run-python3 tools/update_engine_exports.py"
-		,"build_engine_prod": "npm run update_engine_exports && esbuild source/engine/main.js --bundle --minify --global-name=OV --outfile=build/engine_prod/o3dv.min.js"
-		,"build_website_prod": "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=build/website/o3dv.website.min.js"
-		,"build_prod": "npm run update_version && npm run build_engine_prod && npm run build_website_prod"
-		,"build_dist": "node tools/create_dist_folder.cjs"
-		,"deploy_single": "npm run build_prod && npm run build_dist"
+		"build_website_dev": "npm run update_version && esbuild source/website/index.js --bundle --minify --global-name=OV --sourcemap --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js",
+		"build_website": "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js",
+		"update_engine_exports": "run-python3 tools/update_engine_exports.py",
+		"build_dist": "npm run build_website && npm run copy_assets_to_dist",
+		"copy_assets_to_dist": "powershell -Command \"Copy-Item website/*.html dist/; Copy-Item website/robots.txt dist/; Copy-Item website/sitemap.xml dist/; Copy-Item website/studio.js dist/; Copy-Item -Recurse website/assets dist/ -Force; Copy-Item -Recurse website/info dist/ -Force; Copy-Item website/.htaccess dist/\"",
+		"deploy_single": "npm run build_prod && npm run build_dist"
 		,"serve_dist": "npm run deploy_single && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
 	},
 	"devDependencies": {
