@@ -52,6 +52,32 @@ export class ShadingModel
 
         this.scene.add (this.ambientLight);
         this.scene.add (this.directionalLight);
+
+        // Camera spotlight feature
+        this.cameraSpotEnabled = false;
+        this.cameraSpotLight = null;
+    }
+
+    EnableCameraSpotLight (enable)
+    {
+        if (enable && !this.cameraSpotLight) {
+            this.cameraSpotLight = new THREE.SpotLight(0xffffff, 1.2, 0, Math.PI / 8, 0.25, 1.0);
+            this.cameraSpotLight.position.set(0, 0, 0);
+            this.cameraSpotLight.target.position.set(0, 0, -1);
+            this.scene.add(this.cameraSpotLight);
+            this.scene.add(this.cameraSpotLight.target);
+        } else if (!enable && this.cameraSpotLight) {
+            this.scene.remove(this.cameraSpotLight.target);
+            this.scene.remove(this.cameraSpotLight);
+            this.cameraSpotLight.dispose && this.cameraSpotLight.dispose();
+            this.cameraSpotLight = null;
+        }
+        this.cameraSpotEnabled = enable;
+    }
+
+    ToggleCameraSpotLight ()
+    {
+        this.EnableCameraSpotLight(!this.cameraSpotEnabled);
     }
 
     SetShadingType (type)
@@ -98,5 +124,10 @@ export class ShadingModel
     {
         const lightDir = SubCoord3D (camera.eye, camera.center);
         this.directionalLight.position.set (lightDir.x, lightDir.y, lightDir.z);
+        if (this.cameraSpotEnabled && this.cameraSpotLight) {
+            // Place spotlight at camera eye, aim toward center
+            this.cameraSpotLight.position.set(camera.eye.x, camera.eye.y, camera.eye.z);
+            this.cameraSpotLight.target.position.set(camera.center.x, camera.center.y, camera.center.z);
+        }
     }
 }

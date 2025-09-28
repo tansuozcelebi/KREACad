@@ -177,6 +177,8 @@ export class PrimitivesManager
                 return this.CreateIcosahedron(mesh);
             case 'octahedron':
                 return this.CreateOctahedron(mesh);
+            case 'trefoil':
+                return this.CreateTrefoil(mesh);
             default:
                 return null;
         }
@@ -388,6 +390,85 @@ export class PrimitivesManager
         });
 
         return mesh;
+    }
+
+    CreateTrefoil(mesh, a = 1, b = 0.4, q = 3, tube = 0.25, segU = 180, segV = 24)
+    {
+        // Generate trefoil knot with tube geometry
+        const points = [];
+        for (let i = 0; i <= segU; i++) {
+            const u = (i / segU) * Math.PI * 2.0;
+            points.push(this.TrefoilPoint(a, b, q, u));
+        }
+
+        // Approximate tangent and build frame
+        const frames = [];
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            const pNext = points[(i + 1) % points.length];
+            const tx = pNext.x - p.x;
+            const ty = pNext.y - p.y;
+            const tz = pNext.z - p.z;
+            const len = Math.max(Math.hypot(tx, ty, tz), 1e-6);
+            const tnx = tx / len, tny = ty / len, tnz = tz / len;
+
+            // Choose a helper up vector
+            const ux = 0, uy = 0, uz = 1;
+            // Normal = tangent x up
+            let nx = tny * uz - tnz * uy;
+            let ny = tnz * ux - tnx * uz;
+            let nz = tnx * uy - tny * ux;
+            let nlen = Math.max(Math.hypot(nx, ny, nz), 1e-6);
+            nx /= nlen; ny /= nlen; nz /= nlen;
+
+            // Binormal = tangent x normal
+            let bx = tny * nz - tnz * ny;
+            let by = tnz * nx - tnx * nz;
+            let bz = tnx * ny - tny * nx;
+            let blen = Math.max(Math.hypot(bx, by, bz), 1e-6);
+            bx /= blen; by /= blen; bz /= blen;
+
+            frames.push({ p, t: { x: tnx, y: tny, z: tnz }, n: { x: nx, y: ny, z: nz }, b: { x: bx, y: by, z: bz } });
+        }
+
+        // Create tube vertices
+        for (let i = 0; i < frames.length; i++) {
+            const f = frames[i];
+            for (let j = 0; j <= segV; j++) {
+                const v = (j / segV) * Math.PI * 2.0;
+                const cx = Math.cos(v) * tube;
+                const cy = Math.sin(v) * tube;
+                const vx = f.p.x + f.n.x * cx + f.b.x * cy;
+                const vy = f.p.y + f.n.y * cx + f.b.y * cy;
+                const vz = f.p.z + f.n.z * cx + f.b.z * cy;
+                mesh.AddVertex(new Coord3D(vx, vy, vz));
+            }
+        }
+
+        // Create triangles for tube surface
+        const ringSize = segV + 1;
+        for (let i = 0; i < frames.length - 1; i++) {
+            for (let j = 0; j < segV; j++) {
+                const a0 = i * ringSize + j;
+                const a1 = (i + 1) * ringSize + j;
+                const a2 = (i + 1) * ringSize + (j + 1);
+                const a3 = i * ringSize + (j + 1);
+                mesh.AddTriangle(a0, a1, a2);
+                mesh.AddTriangle(a0, a2, a3);
+            }
+        }
+
+        return mesh;
+    }
+
+    // Helper method for trefoil parametric curve
+    TrefoilPoint(a, b, q, u)
+    {
+        return new Coord3D(
+            (a + b * Math.cos(q * u)) * Math.cos(u),
+            (a + b * Math.cos(q * u)) * Math.sin(u),
+            b * Math.sin(q * u)
+        );
     }
 
     SelectObject(primitiveObj)

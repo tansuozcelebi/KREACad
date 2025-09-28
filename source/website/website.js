@@ -24,7 +24,7 @@ import { Direction } from '../engine/geometry/geometry.js';
 import { CookieGetBoolVal, CookieSetBoolVal } from './cookiehandler.js';
 import { MeasureTool } from './measuretool.js';
 import { KreaCAD_VERSION } from './version.js';
-import { CloseAllDialogs } from './dialog.js';
+import { CloseAllDialogs, ButtonDialog } from './dialog.js';
 import { CreateVerticalSplitter } from './splitter.js';
 import { EnumeratePlugins, PluginType } from './pluginregistry.js';
 import { EnvironmentSettings } from '../engine/viewer/shadingmodel.js';
@@ -704,7 +704,12 @@ export class Website
             // Navigate to create.html with 'new' parameter to show primitives bar
             window.location.href = './create.html?mode=new';
         });
-        console.log('DEBUG: New button added to toolbar');
+        AddButton (this.toolbar, 'light', Loc ('Camera Spot Işık'), ['only_on_model'], () => {
+            if (this.viewer && this.viewer.shadingModel) {
+                this.viewer.shadingModel.ToggleCameraSpotLight ();
+                this.viewer.Render ();
+            }
+        });
         AddSeparator (this.toolbar, ['only_on_model']);
         AddButton (this.toolbar, 'fit', Loc ('Fit model to window'), ['only_on_model'], () => {
             this.FitModelToWindow (false);
@@ -792,12 +797,82 @@ export class Website
             this.SwitchTheme (this.settings.themeId, true);
         });
 
+        // About / Info button (align right before theme toggle ideally)
+        AddButton (this.toolbar, 'info', Loc ('About / Info'), ['align_right'], () => {
+            console.log('[INFO BUTTON] Click detected');
+            try {
+                this.ShowAboutDialog();
+            } catch (err) {
+                console.error('[INFO BUTTON] ShowAboutDialog threw error:', err);
+            }
+        });
+
         this.parameters.fileInput.addEventListener ('change', (ev) => {
             if (ev.target.files.length > 0) {
                 HandleEvent ('model_load_started', 'open_file');
                 this.LoadModelFromFileList (ev.target.files);
             }
         });
+    }
+
+    ShowAboutDialog ()
+    {
+        console.log('[ShowAboutDialog] invoked');
+        // Reuse existing dialog system
+        let dialog = new ButtonDialog();
+        let contentDiv = dialog.Init('KreaCAD — About', [
+            {
+                name: Loc('Close'),
+                onClick: () => { dialog.Close(); }
+            }
+        ]);
+        if (!contentDiv) {
+            console.warn('[ShowAboutDialog] contentDiv is null/undefined');
+        }
+
+        // Add custom content
+        let section = AddDiv(contentDiv, 'ov_dialog_section');
+        section.style.maxHeight = '300px';
+        section.style.overflowY = 'auto';
+
+        let intro = AddDiv(section, 'ov_dialog_message');
+    intro.innerHTML = `KreaCAD <b>${KreaCAD_VERSION.fullVersion}</b><br><div class="about_version_pill">${KreaCAD_VERSION.version} • build ${KreaCAD_VERSION.build}</div><br>
+    Advanced 3D CAD Viewer & Parametric Playground.<br>`;
+
+        let devs = AddDiv(section, 'ov_dialog_section');
+        AddDiv(devs, 'ov_dialog_inner_title', Loc('Developers'));
+        let devList = AddDiv(devs, 'ov_dialog_message');
+        devList.innerHTML = `
+            <ul style="margin:4px 0 10px 18px; padding:0;">
+                <li>Tansu Özçelebi (Lead)</li>
+                <li>Contributors: Based on Online3DViewer upstream</li>
+            </ul>`;
+
+        let links = AddDiv(section, 'ov_dialog_section');
+        AddDiv(links, 'ov_dialog_inner_title', Loc('Links'));
+        let linkList = AddDiv(links, 'ov_dialog_message');
+        linkList.innerHTML = `
+            <a href="https://github.com/tansuozcelebi/KREACad" target="_blank">GitHub Repository</a><br>
+            <a href="https://github.com/kovacsv/Online3DViewer" target="_blank">Upstream Project</a><br>
+        `;
+
+        let meta = AddDiv(section, 'ov_dialog_submessage');
+        meta.innerText = `Build: ${KreaCAD_VERSION.build} | Built: ${new Date(KreaCAD_VERSION.timestamp).toLocaleString()}`;
+
+        try {
+            dialog.Show();
+            console.log('[ShowAboutDialog] dialog.Show() executed');
+        } catch (e) {
+            console.error('[ShowAboutDialog] dialog.Show failed:', e);
+        }
+
+        // Apply flight animation class after mount
+        setTimeout(() => {
+            let modalContent = dialog.modalDiv.querySelector('.ov_dialog');
+            if (modalContent) {
+                modalContent.classList.add('about_fly_in');
+            }
+        }, 10);
     }
 
     InitDragAndDrop ()
@@ -1019,6 +1094,8 @@ export class Website
 
         // Update the HTML version div
         setTimeout(() => {
+            // Prefer an existing toolbar slot
+            let toolbarElement = document.getElementById('toolbar');
             let versionDiv = document.getElementById('kreacad_version_display');
             if (versionDiv) {
                 versionDiv.innerHTML = KreaCAD_VERSION.fullVersion;
@@ -1026,13 +1103,13 @@ export class Website
                 console.log('Version updated to:', KreaCAD_VERSION.fullVersion);
             } else {
                 console.log('Version div not found!');
-                // Fallback: create manually
-                this.CreateVersionElement();
+                // Create inside toolbar if possible
+                this.CreateVersionElement(toolbarElement);
             }
         }, 100);
     }
 
-    CreateVersionElement ()
+    CreateVersionElement (parentContainer)
     {
         console.log('Creating version element'); // Debug
 
@@ -1042,25 +1119,27 @@ export class Website
             existingVersion.remove();
         }
 
-        // Add version display to the top-right corner
-        let versionDiv = AddDiv (document.body, 'kreacad_version_display');
+        // Decide parent: toolbar or body fallback
+        let toolbarEl = parentContainer || document.getElementById('toolbar');
+        let container = toolbarEl || document.body;
+
+        // If toolbar exists, place version just before info button (so it appears left of it)
+        let infoButton = null;
+        if (toolbarEl) {
+            infoButton = toolbarEl.querySelector('div.kreacad_toolbar_button img[title="' + Loc('About / Info') + '"]');
+        }
+        let versionDiv = document.createElement('div');
+    versionDiv.className = 'kreacad_version_display kreacad_toolbar_version';
+        if (infoButton && infoButton.parentElement && infoButton.parentElement.parentElement === toolbarEl) {
+            toolbarEl.insertBefore(versionDiv, infoButton.parentElement);
+        } else {
+            container.appendChild(versionDiv);
+        }
         versionDiv.id = 'kreacad_version_display';
         versionDiv.innerHTML = KreaCAD_VERSION.fullVersion;
 
-        // Style the version display
-        versionDiv.style.position = 'fixed';
-        versionDiv.style.top = '10px';
-        versionDiv.style.right = '15px';
-        versionDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        versionDiv.style.color = '#ffffff';
-        versionDiv.style.padding = '4px 8px';
-        versionDiv.style.borderRadius = '4px';
-        versionDiv.style.fontSize = '11px';
-        versionDiv.style.fontFamily = 'monospace';
-        versionDiv.style.zIndex = '9999';
-        versionDiv.style.userSelect = 'none';
-        versionDiv.style.pointerEvents = 'auto';
-        versionDiv.style.opacity = '0.8';
+    // Assign styling class (defined in css)
+    versionDiv.classList.add('kreacad_toolbar_version');
 
         // Add tooltip
         versionDiv.title = `KreaCAD ${KreaCAD_VERSION.version}\nBuild: ${KreaCAD_VERSION.build}\nBuilt: ${new Date(KreaCAD_VERSION.timestamp).toLocaleString()}`;

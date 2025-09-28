@@ -104,21 +104,44 @@ export class SidebarDetailsPanel extends SidebarPanel
             if (!IsTwoManifold (object3D)) {
                 return null;
             }
-            const volume = CalculateVolume (object3D);
-            if (volume <= 0) {
+            const volume = CalculateVolume (object3D); // in model unit^3
+            if (volume <= 0 || isNaN(volume)) {
                 return null;
             }
-            // Convert volume from model units to dm³ if needed
-            let volumeInDm3 = volume;
-            if (unit === Unit.Millimeter) {
-                volumeInDm3 = volume / 1000; // mm³ to dm³
-            } else if (unit === Unit.Centimeter) {
-                volumeInDm3 = volume; // cm³ = dm³
-            } else if (unit === Unit.Meter) {
-                volumeInDm3 = volume * 1000; // m³ to dm³
+            // Convert volume from model units to dm³.
+            // 1 dm³ = 1000 cm³ = 1e6 mm³ = 0.001 m³
+            let volumeInDm3;
+            switch (unit) {
+                case Unit.Millimeter: // mm³ -> dm³
+                    volumeInDm3 = volume / 1_000_000.0; // correct factor
+                    break;
+                case Unit.Centimeter: // cm³ -> dm³
+                    volumeInDm3 = volume / 1000.0;
+                    break;
+                case Unit.Meter: // m³ -> dm³
+                    volumeInDm3 = volume * 1000.0;
+                    break;
+                case Unit.Inch: {
+                    // 1 inch = 25.4 mm => 1 in³ = 25.4^3 mm³
+                    const mm3 = volume * Math.pow(25.4, 3);
+                    volumeInDm3 = mm3 / 1_000_000.0;
+                    break;
+                }
+                case Unit.Foot: {
+                    // 1 foot = 304.8 mm => 1 ft³ = 304.8^3 mm³
+                    const mm3 = volume * Math.pow(304.8, 3);
+                    volumeInDm3 = mm3 / 1_000_000.0;
+                    break;
+                }
+                default:
+                    volumeInDm3 = volume; // fallback (assume already dm³)
             }
-            const weight = volumeInDm3 * this.selectedMaterial.density;
-            return new Property (PropertyType.Text, null, weight.toFixed(2) + ' kg');
+            if (!isFinite(volumeInDm3)) {
+                return null;
+            }
+            const densityKgPerDm3 = this.selectedMaterial.density; // stored as kg/dm³
+            const weightKg = volumeInDm3 * densityKgPerDm3;
+            return new Property (PropertyType.Text, null, weightKg.toFixed(2) + ' kg');
         });
         if (object3D.PropertyGroupCount () > 0) {
             let customTable = AddDiv (this.contentDiv, 'ov_property_table ov_property_table_custom');
@@ -256,10 +279,7 @@ export class SidebarDetailsPanel extends SidebarPanel
     {
         console.log('AddMaterialDropdown called'); // Debug
 
-        // Basit bir property olarak ekleyelim önce
-        this.AddProperty (table, new Property (PropertyType.Text, 'Material', 'Steel (7.85 kg/dm³)'));
-
-        // Şimdi dropdown'u deneyelim
+        // Dropdown row
         let row = AddDiv (table, 'ov_property_table_row');
         let name = AddDiv (row, 'ov_property_table_name');
         let value = AddDiv (row, 'ov_property_table_value');
@@ -267,14 +287,9 @@ export class SidebarDetailsPanel extends SidebarPanel
         name.innerHTML = 'Material Selection'; // Loc kullanmadan test
         console.log('Material label added'); // Debug
 
-        let select = AddDomElement (value, 'select', 'ov_material_dropdown');
-        select.style.width = '100%';
-        select.style.padding = '4px';
-        select.style.border = '1px solid #ccc';
-        select.style.borderRadius = '4px';
-        select.style.backgroundColor = 'white';
-        select.style.fontSize = '12px';
-        console.log('Select element created'); // Debug
+    let select = AddDomElement (value, 'select', 'ov_material_dropdown');
+    // All visual styling now handled via the CSS class .ov_material_dropdown to support themes.
+    console.log('Select element created'); // Debug
 
         // Add options to dropdown
         for (let i = 0; i < MATERIALS_DATABASE.length; i++) {

@@ -252,6 +252,42 @@ div.ov_progress div.ov_progress_text
 	text-align: center;
 }
 
+/* Version pill inside About dialog */
+div.about_version_pill, .about_version_pill {
+	display: inline-block;
+	margin-top: 6px;
+	padding: 3px 10px 4px 10px;
+	font-size: 11px;
+	font-family: monospace;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(110,140,255,0.20), rgba(70,90,160,0.25));
+	color: var(--ov_foreground_color);
+	box-shadow: 0 0 0 1px rgba(160,175,255,0.25), 0 2px 6px -2px rgba(0,0,0,0.45);
+	-webkit-backdrop-filter: blur(4px);
+	backdrop-filter: blur(4px);
+}
+body.ov_dark .about_version_pill {
+	background: linear-gradient(135deg, rgba(120,150,255,0.25), rgba(60,80,150,0.35));
+	box-shadow: 0 0 0 1px rgba(140,160,255,0.35), 0 2px 10px -2px rgba(0,0,0,0.7), 0 0 8px -1px rgba(120,150,255,0.35);
+}
+
+/* About dialog fly-in animation */
+@keyframes about_fly_in_anim {
+	0% { transform: translate3d(0, -60px, 0) scale(0.92); opacity: 0; filter: blur(4px); }
+	60% { transform: translate3d(0, 8px, 0) scale(1.02); opacity: 0.9; filter: blur(0); }
+	100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+
+div.ov_dialog.about_fly_in {
+	animation: about_fly_in_anim 480ms cubic-bezier(.22,.68,.37,1.02);
+	will-change: transform, opacity, filter;
+}
+
+/* Dark mode subtle glow for dialogs */
+body.ov_dark div.ov_dialog {
+	box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 4px 18px rgba(0,0,0,0.75), 0 0 22px -4px rgba(140,170,255,0.18);
+}
+
 div.ov_snapshot_dialog
 {
 	width: 480px;

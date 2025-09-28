@@ -238,6 +238,27 @@ div.kreacad_toolbar div.kreacad_toolbar_separator
 	float: left;
 }
 
+/* Version label inside toolbar */
+
+div.kreacad_toolbar_version, .kreacad_toolbar_version {
+	float: right;
+	padding: 10px 8px;
+	font-size: 11px;
+	font-family: monospace;
+	opacity: 0.75;
+	color: var(--ov_foreground_color);
+	cursor: default;
+	-webkit-user-select: text;
+	user-select: text;
+	line-height: 18px;
+}
+
+/* Dark theme tweak if needed */
+body.ov_dark .kreacad_toolbar_version {
+	opacity: 0.85;
+	text-shadow: 0 0 4px rgba(160,180,255,0.35), 0 0 1px rgba(255,255,255,0.5);
+}
+
 div.pcr-app
 {
 	color: var(--ov_dialog_foreground_color);
@@ -413,4 +434,35 @@ div.ov_bottom_floating_panel
 	padding: 10px;
 }
 
+}
+
+/* Dark themed material dropdown */
+.ov_material_dropdown {
+	width: 100%;
+	padding: 4px 6px;
+	background: #1c1f24;
+	color: #e2e7ed;
+	border: 1px solid #2d333b;
+	border-radius: 4px;
+	font-size: 12px;
+	font-family: inherit;
+	outline: none;
+	transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.ov_material_dropdown:hover {
+	background: #23272d;
+	border-color: #3a434c;
+}
+.ov_material_dropdown:focus {
+	background: #262c33;
+	border-color: #4690c7;
+	box-shadow: 0 0 0 2px rgba(70,144,199,0.35);
+}
+.ov_material_dropdown option {
+	background: #1c1f24;
+	color: #e2e7ed;
+}
+.ov_property_table .ov_material_dropdown:disabled {
+	opacity: .55;
+	cursor: not-allowed;
 }
