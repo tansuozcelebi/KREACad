@@ -1,0 +1,40 @@
+name: Deploy to SiteGround
+
+# kreacad.fabus.app -> SiteGround public_html
+# Pushes to the "master" branch are deployed automatically.
+# You can also trigger it manually from the Actions tab (workflow_dispatch).
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stage files (exclude VCS / dev files)
+        run: |
+          mkdir -p _deploy
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.vscode' \
+            --exclude='_deploy' \
+            ./ _deploy/
+
+      - name: Upload to SiteGround via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: "_deploy/."
+          target: ${{ secrets.DEPLOY_PATH }}
+          strip_components: 1
+          overwrite: true
