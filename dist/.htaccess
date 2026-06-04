@@ -4,16 +4,16 @@
 # Force HTTPS redirect
 RewriteEngine On
 RewriteCond %{HTTPS} off
-RewriteRule (.*) https://kreacad.com/$1 [R=301,L]
+RewriteRule (.*) https://kreacad.fabus.app/$1 [R=301,L]
 
 # Remove www from domain (canonical URL)
 RewriteCond %{HTTP_HOST} ^www\.kreacad\.com [NC]
-RewriteRule ^(.*)$ https://kreacad.com/$1 [R=301,L]
+RewriteRule ^(.*)$ https://kreacad.fabus.app/$1 [R=301,L]
 
 # Add trailing slash for directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !(.*)/$
-RewriteRule ^(.*)$ https://kreacad.com/$1/ [R=301,L]
+RewriteRule ^(.*)$ https://kreacad.fabus.app/$1/ [R=301,L]
 
 # Cache Control for Performance and SEO
 <IfModule mod_expires.c>
