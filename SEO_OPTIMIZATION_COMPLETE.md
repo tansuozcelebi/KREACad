@@ -95,7 +95,7 @@
 
 ### 🔍 Next Steps for Go-Live:
 1. **Google Search Console**
-   - Submit main sitemap: `https://kreacad.com/sitemap.xml`
+   - Submit main sitemap: `https://kreacad.fabus.app/sitemap.xml`
    - Submit individual language sitemaps
    - Request indexing for key pages
 
