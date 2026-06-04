@@ -1,13 +1,25 @@
 name: Deploy to SiteGround
 
-# kreacad.fabus.app -> SiteGround public_html
-# Pushes to the "master" branch are deployed automatically.
-# You can also trigger it manually from the Actions tab (workflow_dispatch).
+# Builds the static site and deploys dist/ to kreacad.fabus.app over SSH (rsync).
+# Pushes to master deploy automatically; can also be run manually (workflow_dispatch).
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SSH_HOST         server host (e.g. kreacad.fabus.app or the SiteGround IP)
+#   SSH_USERNAME     SSH username
+#   SSH_PRIVATE_KEY  private key contents (a passphrase-less key is recommended for CI)
+#   DEPLOY_PATH      absolute web root, e.g. /home/<account>/www/kreacad.fabus.app/public_html
+# Optional secrets:
+#   SSH_PORT         SSH port (defaults to 22; SiteGround commonly uses 18765)
+#   SSH_PASSPHRASE   passphrase for SSH_PRIVATE_KEY, if the key is encrypted
 
 on:
   push:
     branches: [master]
   workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -16,25 +28,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Stage files (exclude VCS / dev files)
-        run: |
-          mkdir -p _deploy
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.vscode' \
-            --exclude='_deploy' \
-            ./ _deploy/
-
-      - name: Upload to SiteGround via SSH
-        uses: appleboy/scp-action@v0.1.7
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "_deploy/."
-          target: ${{ secrets.DEPLOY_PATH }}
-          strip_components: 1
-          overwrite: true
+          node-version: 20.x
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build static site
+        run: |
+          npm run build_engine
+          npm run create_dist
+
+      - name: Deploy dist/ to server over SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: bash ./tools/deploy.sh
