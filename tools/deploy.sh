@@ -13,6 +13,9 @@
 #   SSH_PRIVATE_KEY   Private key contents. When set it is written to a temp file
 #                     and used for auth (CI). When unset, your local ssh-agent /
 #                     ~/.ssh keys are used instead (handy for manual runs).
+#   SSH_PASSPHRASE    Passphrase protecting SSH_PRIVATE_KEY. When set, the key is
+#                     loaded into a throwaway ssh-agent so rsync can authenticate
+#                     non-interactively.
 #   DIST_DIR          Local directory to upload (default: dist)
 #   DEPLOY_DELETE     "true" (default) removes remote files no longer present locally.
 #   DRY_RUN           "true" performs a trial run printing changes without making them.
@@ -48,7 +51,10 @@ fi
 TMP_DIR="$(mktemp -d)"
 KEY_FILE="$TMP_DIR/deploy_key"
 KNOWN_HOSTS="$TMP_DIR/known_hosts"
-cleanup() { rm -rf "$TMP_DIR"; }
+cleanup() {
+  [ -n "${SSH_AGENT_PID:-}" ] && ssh-agent -k >/dev/null 2>&1 || true
+  rm -rf "$TMP_DIR"
+}
 trap cleanup EXIT
 
 # Pin the host key with ssh-keyscan so strict checking passes without an
@@ -65,7 +71,23 @@ SSH_OPTS=(-p "$SSH_PORT" -o "UserKnownHostsFile=$KNOWN_HOSTS" -o "StrictHostKeyC
 if [ -n "${SSH_PRIVATE_KEY:-}" ]; then
   printf '%s\n' "$SSH_PRIVATE_KEY" > "$KEY_FILE"
   chmod 600 "$KEY_FILE"
-  SSH_OPTS+=(-i "$KEY_FILE" -o "IdentitiesOnly=yes")
+
+  if [ -n "${SSH_PASSPHRASE:-}" ]; then
+    # Passphrase-protected key: load it into a throwaway ssh-agent so rsync can
+    # authenticate without a TTY. A tiny SSH_ASKPASS helper feeds the passphrase.
+    eval "$(ssh-agent -s)" >/dev/null
+    ASKPASS="$TMP_DIR/askpass.sh"
+    printf '#!/bin/sh\nprintf "%%s\\n" "$SSH_PASSPHRASE"\n' > "$ASKPASS"
+    chmod 700 "$ASKPASS"
+    if ! SSH_ASKPASS="$ASKPASS" SSH_ASKPASS_REQUIRE=force DISPLAY=":0" \
+         ssh-add "$KEY_FILE" </dev/null >/dev/null 2>&1; then
+      echo "ERROR: failed to load the SSH key — is SSH_PASSPHRASE correct?" >&2
+      exit 1
+    fi
+    # Authenticate via the agent (it holds only this freshly-loaded key).
+  else
+    SSH_OPTS+=(-i "$KEY_FILE" -o "IdentitiesOnly=yes")
+  fi
 fi
 
 # -rlptz: recursive, symlinks, permissions, times, compress.
