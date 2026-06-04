@@ -60,7 +60,8 @@
                     "build_website":  "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js",
                     "build_dist":  "npm run build_website \u0026\u0026 npm run copy_assets_to_dist",
                     "build_prod":  "npm run update_version \u0026\u0026 npm run build_website \u0026\u0026 npm run copy_assets_to_dist",
-                    "copy_assets_to_dist":  "powershell -Command \"Copy-Item *.html dist/; Copy-Item *.xml dist/; Copy-Item robots.txt dist/; Copy-Item studio.js dist/; Copy-Item -Recurse assets dist/ -Force; Copy-Item -Recurse info dist/ -Force; Copy-Item .htaccess dist/;\"",
+                    "create_dist":  "npm run build_dist",
+                    "copy_assets_to_dist":  "node tools/copy_assets_to_dist.cjs",
                     "serve_dist":  "npm run build_dist \u0026\u0026 http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
                 },
     "devDependencies":  {
