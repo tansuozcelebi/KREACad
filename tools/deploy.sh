@@ -57,14 +57,20 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Pin the host key with ssh-keyscan so strict checking passes without an
-# interactive prompt (instead of disabling host-key verification entirely).
-if ! ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" > "$KNOWN_HOSTS" 2>/dev/null || [ ! -s "$KNOWN_HOSTS" ]; then
-  echo "ERROR: could not fetch host key for $SSH_HOST:$SSH_PORT" >&2
-  exit 1
+# Best-effort: pre-fetch and pin the host key so strict checking can be used.
+# If ssh-keyscan can't reach the host (filtered/flaky), don't hard-fail here —
+# fall back to trust-on-first-use during the real connection, and surface a
+# clear reachability diagnostic so misconfigured host/port issues are obvious.
+if ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" > "$KNOWN_HOSTS" 2>/dev/null && [ -s "$KNOWN_HOSTS" ]; then
+  SSH_OPTS=(-p "$SSH_PORT" -o "UserKnownHostsFile=$KNOWN_HOSTS" -o "StrictHostKeyChecking=yes")
+else
+  echo "WARN: could not pre-fetch host key for $SSH_HOST:$SSH_PORT — using accept-new (trust on first use)." >&2
+  if command -v nc >/dev/null 2>&1 && ! nc -z -w 5 "$SSH_HOST" "$SSH_PORT" 2>/dev/null; then
+    echo "WARN: TCP connect to $SSH_HOST:$SSH_PORT failed. Check that SSH_HOST/SSH_PORT are correct" >&2
+    echo "      and that the SSH endpoint is reachable (e.g. not behind a proxy/CDN, firewall open)." >&2
+  fi
+  SSH_OPTS=(-p "$SSH_PORT" -o "UserKnownHostsFile=$KNOWN_HOSTS" -o "StrictHostKeyChecking=accept-new")
 fi
-
-SSH_OPTS=(-p "$SSH_PORT" -o "UserKnownHostsFile=$KNOWN_HOSTS" -o "StrictHostKeyChecking=yes")
 
 # Use an explicit key file when the private key is provided (CI); otherwise the
 # user's ssh-agent / default keys are used.
