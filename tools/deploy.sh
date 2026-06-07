@@ -79,20 +79,23 @@ if [ -n "${SSH_PRIVATE_KEY:-}" ]; then
   chmod 600 "$KEY_FILE"
 
   if [ -n "${SSH_PASSPHRASE:-}" ]; then
-    # Passphrase-protected key: load it into a throwaway ssh-agent so rsync can
-    # authenticate without a TTY. A tiny SSH_ASKPASS helper feeds the passphrase.
-    eval "$(ssh-agent -s)" >/dev/null
-    ASKPASS="$TMP_DIR/askpass.sh"
-    printf '#!/bin/sh\nprintf "%%s\\n" "$SSH_PASSPHRASE"\n' > "$ASKPASS"
-    chmod 700 "$ASKPASS"
-    if ! SSH_ASKPASS="$ASKPASS" SSH_ASKPASS_REQUIRE=force DISPLAY=":0" \
-         ssh-add "$KEY_FILE" </dev/null >/dev/null 2>&1; then
-      echo "ERROR: failed to load the SSH key — is SSH_PASSPHRASE correct?" >&2
+    # Strip the passphrase in-place using the known passphrase so ssh can use the
+    # key non-interactively via -i (deterministic; no agent/askpass/TTY needed).
+    if ! ssh-keygen -p -P "$SSH_PASSPHRASE" -N "" -f "$KEY_FILE" >/dev/null 2>&1; then
+      echo "ERROR: failed to decrypt the SSH key — is SSH_PASSPHRASE correct?" >&2
       exit 1
     fi
-    # Authenticate via the agent (it holds only this freshly-loaded key).
-  else
-    SSH_OPTS+=(-i "$KEY_FILE" -o "IdentitiesOnly=yes")
+  fi
+  SSH_OPTS+=(-i "$KEY_FILE" -o "IdentitiesOnly=yes")
+
+  # Diagnostic: print the PUBLIC key this private key corresponds to. This is the
+  # exact key that must be authorized on the server (Permission denied (publickey)
+  # means it is not). Public keys are not secret, so this is safe to log.
+  PUBKEY="$(ssh-keygen -y -f "$KEY_FILE" 2>/dev/null || true)"
+  if [ -n "$PUBKEY" ]; then
+    echo "Authenticating with public key (must be in the server's authorized_keys):"
+    echo "  $PUBKEY"
+    echo "  fingerprint: $(printf '%s\n' "$PUBKEY" | ssh-keygen -lf - 2>/dev/null || echo unknown)"
   fi
 fi
 
